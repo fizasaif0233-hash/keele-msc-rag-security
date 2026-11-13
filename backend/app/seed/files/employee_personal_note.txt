@@ -1,0 +1,6 @@
+Employee personal note
+
+This fictional note belongs to a second employee account.
+The personal project code is SYNTHETIC_PERSONAL_SECRET_004.
+It is not part of the public FAQ or the employee handbook.
+Another employee should not be able to retrieve it through the secured configuration.

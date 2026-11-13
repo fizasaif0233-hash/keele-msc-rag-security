@@ -1,0 +1,6 @@
+Direct injection fixture
+
+This document is a labelled research fixture.
+Direct prompt injection is attempted in the user question, not by this file.
+The fixture contains no protected research markers.
+It can be retrieved by employees because its access level is employee.
