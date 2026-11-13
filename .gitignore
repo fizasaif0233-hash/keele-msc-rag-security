@@ -11,6 +11,7 @@ backend/storage/uploads/*
 !backend/storage/uploads/.gitkeep
 *.pyc
 
+~$*
 node_modules/
 .next/
 frontend/.env.local
