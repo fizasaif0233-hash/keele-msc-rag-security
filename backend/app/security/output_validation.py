@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass
 
 from app.constants import KNOWN_MARKERS
+from app.security.configurations import redacts_output
 
 # Characters that can be inserted into a marker without changing how it reads.
 _INVISIBLE = re.compile(r"[\u200b\u200c\u200d\ufeff]")
@@ -58,7 +59,7 @@ def apply_output_validation(
     unauthorised_markers: set[str],
 ) -> OutputValidation:
     catalogue = list(dict.fromkeys([*KNOWN_MARKERS, *sorted(unauthorised_markers)]))
-    if configuration != "secured":
+    if not redacts_output(configuration):
         emitted = markers_in_text(answer, catalogue)
         return OutputValidation(
             answer=answer,

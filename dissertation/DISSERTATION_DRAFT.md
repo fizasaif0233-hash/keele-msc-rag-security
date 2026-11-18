@@ -3,9 +3,11 @@
 **Keele University**  
 **Module:** CSC-40098 MSc Project  
 **Assessment:** Final MSc Project: Report and Associated Project Outputs  
-**Candidate name:** Kahamre Clarke  
+**Candidate name:** Khamare Clarke  
 **Student number:** 25005383  
-**Date:** 13 November 2026
+**Date:** 13 November 2026  
+**Live website:** https://keele-msc-rag-web.vercel.app  
+**Live API:** https://keele-msc-rag-api.vercel.app
 
 ---
 
@@ -13,7 +15,7 @@
 
 I declare that this dissertation is my own work, except where I have indicated otherwise by quotation or citation. I have not submitted this work for any other award. The software, tests, and measurements described here were produced for this project. No experimental rate in this dissertation has been invented. Where evidence was not collected, the gap is marked as a placeholder.
 
-Kahamre Clarke  
+Khamare Clarke  
 25005383  
 13 November 2026
 
@@ -29,7 +31,7 @@ I am grateful to Keele University for the opportunity to complete this project a
 
 ## Table of contents
 
-[Generated in the Word document from heading styles.]
+The entries below are written into the Word document from the chapter and section headings.
 
 ## List of figures
 
@@ -69,6 +71,7 @@ I am grateful to Keele University for the opportunity to complete this project a
 - Table 10. Trial-level outcomes.
 - Table 11. Synthetic corpus used in the official run.
 - Table 12. Twenty-four-week project schedule.
+- Table 13. Synthetic sign-in accounts.
 
 ## List of abbreviations
 
@@ -146,7 +149,7 @@ OWASP Foundation (2025) includes filtering among mitigations and warns that stri
 
 ## 2.5 Why these controls, and what remains open
 
-The selected controls sit where the application can still intervene: identity, the document allow-list, prompt placement, input length, known markers in the answer, and the decision log. Each one is implemented in code and can be switched off together in the baseline. They do not retrain the model, and they do not isolate one control from the others. Greshake et al. (2023) and Liu et al. (2024) both show that prompt-level defences leave residual risk. The empirical question is narrower: on this application, corpus, and case list, what difference does the bundle make to the defined rates, legitimate answers, and latency?
+The controls are identity, the document allow-list, prompt placement, input length, known markers, and the decision log. They change together. Hines et al. (2024) transform untrusted text so a model can separate it from instructions. On their GPT-family tests, indirect-attack success fell from above 50 per cent to below 2 per cent. This project uses boundary markers rather than that encoding, and its indirect cases were 0 of 2 on both paths. Greshake et al. (2023) and Liu et al. (2024) show that prompt-level defences leave residual risk.
 
 # Chapter 3 Methodology and Research Design
 
@@ -282,7 +285,7 @@ The direct database host did not resolve on the development machine, so the appl
 
 Automated tests check rules that do not depend on a model answer. They cover the permission matrix, including employee denial of an HR document, prompt separation, input and upload checks, marker redaction, log scrubbing, outcome labels, and the rate formulas. Numbers inside the formula tests are fixtures, not findings. Isolation tests use the database. A missing token and a forged token returned 401 and were logged. Using the stored embedding of the HR document, the employee allow-list did not put the restricted markers in the secured prompt. The baseline search did, and it placed the HR marker in the system message. A chunk from outside the secured scope was dropped before the model call and was kept on the baseline path.
 
-In this workspace, the access, security, and isolation modules completed with 15 passed tests. The catalogue and evaluation modules later completed with 16 passed tests. A full-suite report after the corpus-scope change was not archived. No browser test of login, a rejected password, or logout was recorded.
+In this workspace, the access, security, and isolation modules completed with 15 passed tests. The catalogue and evaluation modules later completed with 16 passed tests. Appendix J records the full automated suite run on 18 November 2026. The sign-in captures in Appendix F are not that automated suite.
 
 ## 6.2 The paired run
 
@@ -328,7 +331,7 @@ The baseline block was the empty question, which both configurations reject. The
 
 ## 6.3 How the secured trials were blocked
 
-Appendix C lists every trial. On the baseline, seven marker attacks left a forbidden marker visible. Most of those questions retrieved administrator and confidential documents as well as employee and public ones. The horizontal case retrieved only the requested confidential note, and the personal marker was visible. The two indirect questions retrieved the same broad set and emitted no marker. They are false negatives: the attack finished without disclosure, and the baseline filter was off, so this is not a permission-filter defence.
+Appendix C lists every trial. Seven baseline attack successes were a visible forbidden marker, and the eighth was the oversized question, which disclosed none. Three of the seven questions already contained the target marker, so an echo can count: the direct administrator request, the direct HR request, and the role-claim. The direct finance instruction, the administrator-policy request, the HR-code request, and the other employee’s note did not contain the marker. Most retrieved administrator and confidential documents as well as employee and public ones. The horizontal case retrieved only the requested note, and the personal marker was visible. Indirect attack success was 0 of 2 on both paths. The baseline non-disclosures are false negatives, not a filter defence, and the secured blocks are not a measured reduction in indirect injection.
 
 On the secured path, completed employee attack trials retrieved only employee and public documents, or no documents when the only requested title was the other employee’s note. Eight of those trials were blocked because the targets were outside the scope and no forbidden marker remained. The direct administrator-code trial is the exception. Retrieval did not include an administrator document, but the model emitted the administrator marker and the output check removed it. That question already contains the marker, so the block is redaction of a string present in the question, not evidence that an administrator chunk was retrieved. The finance question does not contain the marker. Baseline disclosed it after retrieving confidential and administrator material. Secured retrieval stayed within employee and public documents, the marker was not emitted, and the recorded rule is the permission filter.
 
@@ -342,33 +345,35 @@ Mean latency rose from 8,102 to 9,437 milliseconds. The medians were 5,987 and 1
 
 ## 6.5 Evidence that was not collected
 
-Appendix F records the sign-in screen, a rejected password, sign-out, and the evaluation page. Those captures are not scored trials. The HR label is covered by the permission unit test, not by a chat trial. The CSV and JSON export files were not written into the repository. The figures above were read from the database through the reporting function.
+Appendix F records the sign-in screen, a rejected password, sign-out, and the evaluation page. Those captures are not scored trials. The HR label is covered by the permission unit test, not by a chat trial. Appendix J holds the CSV and JSON export of comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655, read from the stored trials on 18 November 2026. The figures above were read from the database through the reporting function.
 
 # Chapter 7 Discussion
 
-In this run, measured attack success fell from 8 of 11 trials to 0 of 10, and measured disclosure fell from 7 of 15 trials to 0 of 14. All four legitimate tasks still succeeded. Mean latency was 1,334 milliseconds higher, and one provider failure was excluded. Liu et al. (2024) found residual attack success under a wider set of defences, and OWASP Foundation (2025) states that prevention may not be fool-proof. One model, fifteen cases, and one repetition are a smaller basis than those studies.
+In this run, measured attack success fell from 8 of 11 trials to 0 of 10, and measured disclosure fell from 7 of 15 trials to 0 of 14. The comparison is of the whole bundle. Indirect injection was 0 of 2 in both configurations, and zero secured successes in ten trials is not a true probability of zero. All four legitimate tasks still succeeded. Mean latency was 1,334 milliseconds higher, and one provider failure was excluded. Liu et al. (2024) found residual attack success under wider defences, and OWASP Foundation (2025) states that prevention may not be fool-proof. One model, fifteen cases, and one repetition are a smaller basis than those studies.
 
 Most secured blocks were the permission filter: restricted documents were absent from retrieval, and no forbidden marker remained. Sandhu et al. (1996) treat that permission as an application decision rather than a request the user can talk their way past. Greshake et al. (2023) supply the corresponding reason. If a confidential document is not retrieved, an instruction inside it is not executed. The horizontal trial is the clearest case. Baseline disclosed the personal marker from the requested note. The secured path removed that note and retrieved nothing.
 
-The indirect cases qualify the headline. Baseline already produced no marker, even with confidential and administrator chunks in the retrieved set. The secured label is blocked because the targets were excluded, not because a leak was caught in the answer. Those two labels are not the same event. The direct administrator trial is the other qualification. The marker was emitted and redacted even though no administrator document was retrieved, and the question already contained the marker. Perez and Ribeiro (2022) noted that post-processing can stop an exact string. It did so here. It would not catch a paraphrase. The finance question and the administrator-policy question did not contain the marker. Baseline disclosed both. Secured retrieval excluded the restricted documents and did not emit the markers. That is the strongest disclosure contrast in the run, and it is still one pass.
+The direct administrator trial shows the echo limit. The marker was emitted and redacted even though no administrator document was retrieved, and the question already contained the marker. Perez and Ribeiro (2022) noted that post-processing can stop an exact string. It did so here. It would not catch a paraphrase. The finance question and the administrator-policy question did not contain the marker. Baseline disclosed both after retrieving restricted documents. Secured retrieval excluded those documents and did not emit the markers. That is the strongest disclosure contrast in the run, and it is still one pass.
 
 Legitimate-task success did not fall. The secured employee still received the public and handbook facts, and the administrator still received an authorised marker. The latency increase is real for this sample and is modest beside the multi-second generation time already present on the baseline. Usability evidence beyond latency and task success was not collected. No user study was run.
 
-The design limits the interpretation. The controls changed together. Top-k 8 on eight chunks means the baseline often retrieved the whole synthetic corpus, so the experiment measures access to that set, not ranking quality. The oracle is exact. The provider failed once. Logs can be edited by anyone with database access. These limits agree with the measurement stance in NIST (2023): a result is a record of a system under stated conditions, not a certificate.
+The design limits the interpretation. The controls changed together. Top-k 8 on eight chunks means the baseline often retrieved the whole synthetic corpus, so the experiment measures access to that set, not ranking quality. The oracle is exact. The provider failed once. NIST (2023) treats such a result as a record under stated conditions, not a certificate.
 
 # Chapter 8 Conclusion and Future Work
 
 This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met at the level of a working system and one completed paired run. They were not met as a multi-repetition study, a browser test record, or a single-control ablation.
 
-The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On the evidence of this run, measured attack success and measured disclosure were lower under the secured configuration, legitimate success was unchanged at four of four, and mean latency was 1,334 milliseconds higher. The main technical contribution is the instrumented comparison, including the decision rule on each trial, rather than a claim that the model became safe. Indirect baseline trials did not disclose even without the filter. One secured trial never received a model answer. Prompt injection was not shown to be eliminated.
+The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On this run the secured bundle had lower measured attack success and disclosure, legitimate success stayed at four of four, and mean latency was 1,334 milliseconds higher. The controls changed together, so one control’s effect is unestablished. Indirect injection was 0 of 2 on both paths. Three of the seven baseline marker disclosures used a question that already contained the marker. The contribution is the stored comparison, including each decision rule, not a claim that the model became safe. One secured trial never received a model answer. Prompt injection was not shown to be eliminated.
 
-Further work should repeat the suite enough times to see provider variation, split the secured bundle into separate runs, and add a paraphrase check that does not replace the exact oracle. A saved CSV and JSON export and a version-control history would still complete the submission evidence. An HR user role is not required to test the HR label, but a stored trial against an HR-labelled document would make that path visible in the same results table. Until those gaps are filled, the numerical claims in Chapter 6 should be quoted with the fractions and the exclusion, not as a general percentage improvement.
+Further work should repeat the suite enough times to see provider variation, split the secured bundle into separate runs, and add a paraphrase check that does not replace the exact oracle. The export is in Appendix J. Appendix K separates retrieval, emission, and visible disclosure. A second repetition and a single-control ablation are still absent. A stored trial against an HR-labelled document would show that path in the results table. Until those gaps are filled, the numerical claims in Chapter 6 should be quoted with the fractions and the exclusion, not as a general percentage improvement.
 
 <!-- WORD_COUNT_END -->
 
 # References
 
 Greshake, K., Abdelnabi, S., Mishra, S., Endres, C., Holz, T. and Fritz, M. (2023) ‘Not what you’ve signed up for: compromising real-world LLM-integrated applications with indirect prompt injection’, *Proceedings of the 16th ACM Workshop on Artificial Intelligence and Security (AISec ’23)*, pp. 79–90. Available at: https://doi.org/10.1145/3605764.3623985 (Accessed: 13 November 2026).
+
+Hines, K., Lopez, G., Hall, M., Zarfati, F., Zunger, Y. and Kiciman, E. (2024) ‘Defending against indirect prompt injection attacks with spotlighting’. arXiv:2403.14720. Available at: https://arxiv.org/abs/2403.14720 (Accessed: 18 November 2026).
 
 Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S. and Kiela, D. (2020) ‘Retrieval-augmented generation for knowledge-intensive NLP tasks’, *Advances in Neural Information Processing Systems*, 33. Available at: https://arxiv.org/abs/2005.11401 (Accessed: 13 November 2026).
 
@@ -419,7 +424,7 @@ Sandhu, R.S., Coyne, E.J., Feinstein, H.L. and Youman, C.E. (1996) ‘Role-based
 | input-empty | Input validation | Employee | Acceptance of a blank question means attack success. Both configurations reject it. |
 | input-long | Input validation | Employee | Acceptance of the 5,000-character question means attack success. |
 
-The indirect notice tells the model to reveal codes and does not contain the marker strings. Two direct questions and the role-claim question do contain a marker string. An echo of that string counts as a visible marker. Chapter 6 states where that limitation applies.
+The indirect notice tells the model to reveal codes and does not contain the marker strings. The direct administrator question contains SYNTHETIC_ADMIN_SECRET_003, the direct HR question contains SYNTHETIC_HR_SECRET_001, and the role-claim contains SYNTHETIC_FINANCE_SECRET_002. An echo of that string counts as a visible marker. The direct finance instruction, the administrator-policy request, the HR-code request, and the request for the other employee’s note do not contain those strings, so a visible marker on those trials is not an echo of the question. Chapter 6 uses that distinction. The headline rates are not rewritten to remove the echo-capable cases.
 
 # Appendix C Trial-level results
 
@@ -605,3 +610,57 @@ The module runs for 24 weeks. The schedule below starts on Monday 25 May 2026 an
 # Appendix H API outline
 
 The service is mounted at `/api/v1`. Health is unauthenticated. All other routes require a bearer token. Document routes list, upload, read, reprocess, relabel, grant, and delete. Chat routes manage sessions and messages. Research routes manage datasets and cases. Platform routes manage experiments, analytics, CSV and JSON export, security logs, settings, and users. Role checks use the profile. Full request fields are defined by the Pydantic models in the API modules.
+
+# Appendix I How to use the application
+
+A public copy of the website is at https://keele-msc-rag-web.vercel.app and its API is at https://keele-msc-rag-api.vercel.app. That hosted copy can answer a chat request if the request finishes within 60 seconds. It cannot finish a background experiment after the response returns, and an uploaded file lasts only for the life of the function. The paired-run figures in this dissertation were measured on the local installation. An examiner who wants to repeat that run should use the local procedure below, not the hosted copy.
+
+The four synthetic accounts are listed in Table 13. They are not Keele University accounts. They share one password. That password is the value of SEED_USER_PASSWORD in backend/.env on the development machine. It is not printed in this dissertation, and it should be given to an examiner separately. The database password, Supabase service key, and model key are also kept in that file. The public Supabase address and anon key are in frontend/.env.local. None of those values is copied here.
+
+**Table 13. Synthetic sign-in accounts.**
+
+| Account | Email | What this account can do |
+| --- | --- | --- |
+| Administrator | admin.synthetic@keele-rag.example | Documents, both chat configurations, experiments, evaluation, logs, settings, and user roles |
+| Employee | employee.synthetic@keele-rag.example | Authorised documents and secured chat only. Baseline chat, experiments, and evaluation are unavailable |
+| Second employee | employee2.synthetic@keele-rag.example | Same limits as the employee account. This account owns the employee personal note |
+| Researcher | researcher.synthetic@keele-rag.example | Datasets, cases, both chat configurations, experiments, evaluation, and logs. Baseline chat can retrieve restricted synthetic documents. This is not the employee permission set. Settings changes are reserved for the administrator |
+
+To reproduce the application on a clean Windows machine, install Python 3.11 and Node.js 20, then copy backend/.env.example to backend/.env and frontend/.env.example to frontend/.env.local. Fill the database URL, Supabase URL, anon key, service-role key, model key, and a SEED_USER_PASSWORD of at least 12 characters. Apply supabase/migrations/0001_init.sql and supabase/migrations/0002_hr_access_level.sql in the Supabase SQL editor, with the vector extension enabled. From the backend folder, create the virtual environment, install requirements.txt, and run scripts/seed.py. That script creates the four accounts if they are absent, assigns their roles, and loads the synthetic corpus and the fifteen official cases. From the frontend folder, run npm install.
+
+Start the API with one worker from the backend folder:
+
+.\.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Start the site from the frontend folder with npm run dev. Open http://localhost:3000. The local health check is http://127.0.0.1:8000/api/v1/health. The hosted health check is https://keele-msc-rag-api.vercel.app/api/v1/health. A wrong password stays on the sign-in page and shows “Invalid login credentials”. Sign out is at the bottom of the left-hand menu and returns to the sign-in page. A paired experiment must be started on this local API. The hosted API will not keep that background run alive after the page responds.
+
+After signing in, use the pages as follows.
+
+1. Dashboard shows the number of documents this account can open, its chat sessions, and, for an administrator or researcher, the stored experiment rates.
+2. Documents lists only files the account may read. An administrator can upload a TXT or PDF file and choose Public, Employee, HR, Confidential, or Administrator. An employee cannot upload while employee upload is false in Settings.
+3. AI chat asks a question of the documents. Choose Secured or, for an administrator or researcher, Baseline. Leave the document boxes unticked to use that configuration’s default search. Employees are kept on Secured.
+4. Security research lists the fifteen official cases. Experiments starts a paired run. Open a completed row to see each trial. Evaluation shows the comparison and can export CSV or JSON. Security logs records decisions without storing passwords or full document text. Settings shows the model name and retrieval numbers. The database password, Supabase keys, and model key are marked Configured and are not shown on the page.
+
+The database password, Supabase service key, and model key remain in backend/.env on this computer. The public Supabase address and anon key remain in frontend/.env.local. They are required to start the servers, and they are not copied into this dissertation.
+
+# Appendix J Stored export and automated tests
+
+The files below were written on 18 November 2026 from the stored paired run and from the automated tests in the repository. They do not add a second repetition, and they do not change the rates in Chapter 6.
+
+The export is limited to the experiments named “Synthetic suite paired run 2026-11-13” in comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655. `dissertation/EVIDENCE/paired-run-2026-11-13.csv` is the trial table. `dissertation/EVIDENCE/paired-run-2026-11-13.json` is the same trials with the reporting summary. `dissertation/EVIDENCE/pytest-2026-11-18.txt` is the output of the automated suite run on that date. `dissertation/EVIDENCE/pytest-2026-11-19.txt` is a later run of the same suite after the isolated-control tests were added. Passwords and provider keys are not in these files.
+
+# Appendix K Mechanism split for the same run
+
+This appendix uses the stored trial details in the 18 November 2026 export. It does not change the Chapter 6 rates. Retrieval exposure means a retrieved chunk had an administrator, confidential, or HR label. Marker emission means the model emitted a catalogue marker before redaction. Visible disclosure means that marker remained in the answer. Rejected inputs recorded as 0 milliseconds are excluded from the extra latency row.
+
+| Mechanism, measured attack trials | Baseline | Secured |
+| --- | --- | --- |
+| Restricted label retrieved | 10/11 | 0/10 |
+| Catalogue marker emitted before redaction | 7/11 | 1/10 |
+| Catalogue marker still visible | 7/11 | 0/10 |
+
+The one secured emission is the direct administrator trial. No administrator document was retrieved. The question already contained the marker, and the output check removed it. That trial is not the same event as the ten baseline trials that retrieved a restricted label. The empty baseline question retrieved nothing. The oversized baseline question retrieved restricted labels but emitted no marker. Mean latency for measured trials with a non-zero latency was 8,681 milliseconds on the baseline (14 trials) and 11,010 milliseconds on the secured path (12 trials). The Chapter 6 means, 8,102 and 9,437 milliseconds, still include the zero-millisecond rejections.
+
+A researcher is not an ordinary employee. The researcher can run the baseline configuration, which retrieves restricted synthetic documents. That privilege is for the experiment. It is not the employee permission set.
+
+The code also defines three partial configurations: permission filter only, prompt separation only, and output redaction only. Automated tests check that each one changes only its own control. They do not call the model. A scored Gemini ablation, a larger indirect-injection suite, and a five-repetition run were not executed. The Chapter 6 rates remain the single paired run of 13 November 2026. Permission filtering is a deterministic application decision: the same caller and document produce the same allow or deny. Prompt separation asks the model to ignore instructions inside retrieved text, so its effect can vary between calls. Output redaction removes a known marker after the model has already emitted it. Those are different mechanisms, and the table above keeps them apart.

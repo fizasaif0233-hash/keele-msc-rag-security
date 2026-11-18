@@ -83,6 +83,10 @@ def assert_configuration_allowed(role: str, configuration: str, *, experiment_ex
 
     if configuration not in CONFIGURATIONS:
         raise InputRejected("Unknown configuration.")
+    if configuration in {"permission_only", "prompt_separation_only", "redaction_only"} and not experiment_execution:
+        raise PermissionDenied(
+            "Partial security configurations can be used only by the experiment runner."
+        )
     if configuration == "baseline" and role == "employee" and not experiment_execution:
         raise PermissionDenied(
             "Baseline chat is limited to researcher and administrator accounts."

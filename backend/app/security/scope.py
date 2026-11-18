@@ -7,6 +7,8 @@ must never fall through to the full corpus.
 
 from uuid import UUID
 
+from app.security.configurations import permission_filtered
+
 
 def resolve_document_scope(
     *,
@@ -19,7 +21,7 @@ def resolve_document_scope(
     ready = set(all_ready_ids)
     authorised = set(authorised_ids) & ready
 
-    if configuration == "baseline":
+    if not permission_filtered(configuration):
         if requested_ids is not None:
             scope = set(requested_ids) & ready
             denied = scope - authorised

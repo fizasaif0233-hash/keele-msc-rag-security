@@ -6,7 +6,7 @@ The commands below assume Windows PowerShell and the repository root `Project-Ke
 
 1. Create a Supabase project.
 2. In the SQL editor, enable the `vector` extension if it is not already available. The Database extensions page can do this.
-3. Run `supabase/migrations/0001_init.sql`.
+3. Run `supabase/migrations/0001_init.sql`, then `supabase/migrations/0002_hr_access_level.sql`. The second script adds the HR access label used by the application.
 4. If the editor reports that the type `vector` does not exist, enable the extension and run the script again. On some projects the extension lives in the `extensions` schema and that schema must be on the SQL `search_path`.
 5. Under Authentication, decide whether new users must confirm email. For a local study, disabling confirmation avoids a blocked first login. For a hosted study, leave confirmation on and use the reset-password redirect below.
 6. Add `http://localhost:3000/reset-password` to the authentication redirect URLs.

@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 from docx import Document
+from PIL import Image, ImageDraw, ImageFont
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -70,6 +71,32 @@ def new_canvas():
 def save(image, name):
     FIGURES.mkdir(exist_ok=True)
     image.save(FIGURES / name, "PNG")
+
+
+def crop_figures():
+    """Trim the white margin so a diagram fills its page area."""
+    for path in FIGURES.glob("figure*.png"):
+        image = Image.open(path).convert("RGB")
+        pixels = image.load()
+        width, height = image.size
+        min_x, min_y, max_x, max_y = width, height, 0, 0
+        for y in range(height):
+            for x in range(width):
+                if pixels[x, y] != (255, 255, 255):
+                    min_x = min(min_x, x)
+                    min_y = min(min_y, y)
+                    max_x = max(max_x, x)
+                    max_y = max(max_y, y)
+        if max_x <= min_x or max_y <= min_y:
+            continue
+        pad = 28
+        box = (
+            max(0, min_x - pad),
+            max(0, min_y - pad),
+            min(width, max_x + pad + 1),
+            min(height, max_y + pad + 1),
+        )
+        image.crop(box).save(path, "PNG")
 
 
 def draw_figures():
@@ -199,26 +226,32 @@ def add_table(document, rows):
     document.add_paragraph()
 
 
-def add_toc(paragraph):
-    run = paragraph.add_run()
-    fld_begin = OxmlElement("w:fldChar")
-    fld_begin.set(qn("w:fldCharType"), "begin")
-    run._r.append(fld_begin)
-    run = paragraph.add_run()
-    instr = OxmlElement("w:instrText")
-    instr.set(qn("xml:space"), "preserve")
-    instr.text = r' TOC \o "1-2" \h \z \u '
-    run._r.append(instr)
-    run = paragraph.add_run()
-    fld_sep = OxmlElement("w:fldChar")
-    fld_sep.set(qn("w:fldCharType"), "separate")
-    run._r.append(fld_sep)
-    run = paragraph.add_run("Right-click and update this field in Word if the entries are not yet filled.")
-    set_run_font(run, size=12, italic=True)
-    run = paragraph.add_run()
-    fld_end = OxmlElement("w:fldChar")
-    fld_end.set(qn("w:fldCharType"), "end")
-    run._r.append(fld_end)
+def contents_entries(lines):
+    skipped = {"Table of contents", "List of figures", "List of tables", "List of abbreviations"}
+    entries = []
+    for raw in lines:
+        line = raw.strip()
+        if line.startswith("# "):
+            title = line[2:].strip()
+            if title.startswith("Evaluating Security"):
+                continue
+            entries.append((1, title))
+        elif line.startswith("## "):
+            title = line[3:].strip()
+            if title not in skipped:
+                entries.append((2, title))
+    return entries
+
+
+def add_contents(document, entries):
+    for level, title in entries:
+        paragraph = document.add_paragraph()
+        paragraph.paragraph_format.space_before = Pt(2)
+        paragraph.paragraph_format.space_after = Pt(2)
+        paragraph.paragraph_format.line_spacing = 1.15
+        if level == 2:
+            paragraph.paragraph_format.left_indent = Cm(0.75)
+        add_text(paragraph, title, size=12, bold=level == 1)
 
 
 def add_page_number(paragraph):
@@ -285,6 +318,7 @@ def parse_row(line):
 
 
 def build():
+    crop_figures()
     document = Document()
     configure(document)
     lines = DRAFT.read_text(encoding="utf-8").splitlines()
@@ -314,8 +348,7 @@ def build():
                 document.add_page_break()
             document.add_heading(heading, level=1 if major else 2)
             if heading == "Table of contents":
-                p = document.add_paragraph()
-                add_toc(p)
+                add_contents(document, contents_entries(lines))
                 while i + 1 < len(lines) and not lines[i + 1].startswith("#"):
                     i += 1
                     if lines[i].startswith("## ") or lines[i].startswith("# "):
@@ -375,8 +408,13 @@ def build():
         add_text(p, line, size=12)
         style_paragraph(p)
         i += 1
-    document.save(DOCX)
-    print(DOCX)
+    try:
+        document.save(DOCX)
+        print(DOCX)
+    except PermissionError:
+        alternate = ROOT / "Final_MSc_Dissertation_Khamare.docx"
+        document.save(alternate)
+        print(alternate)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from app.security.configurations import separates_untrusted
+
 
 @dataclass
 class RetrievedChunk:
@@ -27,7 +29,7 @@ def build_messages(
     question: str,
     chunks: list[RetrievedChunk],
 ) -> list[dict[str, str]]:
-    if configuration == "secured":
+    if separates_untrusted(configuration):
         if chunks:
             blocks = []
             for index, chunk in enumerate(chunks, start=1):

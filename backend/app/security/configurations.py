@@ -39,7 +39,58 @@ CONFIGURATION_DEFINITIONS: dict[str, dict[str, Any]] = {
         "security_decision_logging": True,
         "document_management_authorisation": True,
     },
+    "permission_only": {
+        "name": "Permission filter only",
+        "summary": "Permission-filtered retrieval only. Prompt separation and output redaction stay off. Input limit matches the baseline.",
+        "authentication_required": True,
+        "permission_filtered_retrieval": True,
+        "trusted_untrusted_separation": False,
+        "input_validation": "infrastructure_limits_only",
+        "output_validation": False,
+        "security_decision_logging": True,
+        "document_management_authorisation": True,
+    },
+    "prompt_separation_only": {
+        "name": "Prompt separation only",
+        "summary": "Trusted and untrusted text are separated. Retrieval is not permission-filtered and markers are not redacted.",
+        "authentication_required": True,
+        "permission_filtered_retrieval": False,
+        "trusted_untrusted_separation": True,
+        "input_validation": "infrastructure_limits_only",
+        "output_validation": False,
+        "security_decision_logging": True,
+        "document_management_authorisation": True,
+    },
+    "redaction_only": {
+        "name": "Output redaction only",
+        "summary": "Unauthorised markers are redacted. Retrieval is not permission-filtered and retrieved text stays in the system message.",
+        "authentication_required": True,
+        "permission_filtered_retrieval": False,
+        "trusted_untrusted_separation": False,
+        "input_validation": "infrastructure_limits_only",
+        "output_validation": True,
+        "security_decision_logging": True,
+        "document_management_authorisation": True,
+    },
 }
+
+
+PARTIAL_CONFIGURATIONS = ("permission_only", "prompt_separation_only", "redaction_only")
+
+
+def permission_filtered(configuration: str) -> bool:
+    flags = CONFIGURATION_DEFINITIONS.get(configuration) or {}
+    return bool(flags.get("permission_filtered_retrieval"))
+
+
+def separates_untrusted(configuration: str) -> bool:
+    flags = CONFIGURATION_DEFINITIONS.get(configuration) or {}
+    return bool(flags.get("trusted_untrusted_separation"))
+
+
+def redacts_output(configuration: str) -> bool:
+    flags = CONFIGURATION_DEFINITIONS.get(configuration) or {}
+    return bool(flags.get("output_validation"))
 
 ALWAYS_ON_CONTROLS = [
     "A valid Supabase access token is required for every application request.",

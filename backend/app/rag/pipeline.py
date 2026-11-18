@@ -14,7 +14,11 @@ from app.exceptions import InfrastructureError, PermissionDenied
 from app.models import Document, DocumentPermission, Profile
 from app.rag.llm import embed_texts, generate_answer
 from app.rag.retrieval import search_chunks
-from app.security.configurations import CONFIGURATION_DEFINITIONS
+from app.security.configurations import (
+    CONFIGURATION_DEFINITIONS,
+    redacts_output,
+    separates_untrusted,
+)
 from app.security.input_validation import validate_question
 from app.security.logging import write_security_log
 from app.security.output_validation import apply_output_validation, split_marker_access
@@ -276,7 +280,7 @@ def answer_question(
     ]
 
     messages = build_messages(configuration=configuration, question=validation.text, chunks=chunks)
-    if configuration == "secured":
+    if separates_untrusted(configuration):
         system_text = messages[0]["content"]
         for chunk in chunks:
             if chunk.content and chunk.content in system_text:
@@ -309,7 +313,7 @@ def answer_question(
     result.output_filter_applied = validated.redacted
     result.model_emitted_markers = validated.emitted_markers
     result.visible_markers = validated.visible_markers
-    if configuration == "secured":
+    if redacts_output(configuration):
         for source in result.sources:
             source["excerpt"] = apply_output_validation(
                 str(source.get("excerpt") or ""),

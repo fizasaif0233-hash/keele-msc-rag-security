@@ -1,18 +1,20 @@
-# Missing evidence
+# Evidence status
 
-The dissertation uses the implementation and the paired run stored on 13 November 2026. Interface screenshots were captured on the same date and are in Appendix F. The title page, declaration, Appendix D, and Appendix G are filled in. No staff name is used. The items below were not available. Do not invent experimental numbers.
+The dissertation uses the paired run stored on 13 November 2026. The export of that run was written locally on 18 November 2026. Do not invent experimental numbers, and do not backdate the export.
 
-## Required before a polished submission
+## Present on this computer
 
-1. A CSV and JSON export of the completed run saved into the repository. The 30 trial rows are in the database, and Chapter 6 was calculated from them. The export file itself was not present.
+1. `dissertation/EVIDENCE/paired-run-2026-11-13.csv`
+2. `dissertation/EVIDENCE/paired-run-2026-11-13.json`
+3. `dissertation/EVIDENCE/pytest-2026-11-18.txt`
 
-## Useful, but not required to keep the current numerical claims
+These files are the source of Appendix J and are stored with the project. `backend/requirements.lock.txt` was frozen from the local environment on 19 November 2026. It is not a reconstruction of the environment used on 13 November 2026.
 
-2. More than one repetition, if the discussion of provider variability is to be numerical. The reported run uses one repetition.
-3. A stored chat trial against a document whose access level is HR. The permission unit test covers that rule. The paired run’s human-resources case uses the confidential policy, not an HR-labelled file.
-4. A saved full Pytest report taken after the corpus-scope change. Observed session results were 15 passed tests for the access, security, and isolation modules, and 16 passed tests for the catalogue and evaluation modules.
-5. An ablation that turns on one secured control at a time. The current secured condition is a bundle, and the dissertation treats it as a bundle.
+The export counts match Chapter 6: baseline attack success 8/11 and disclosure 7/15; secured attack success 0/10 and disclosure 0/14. One secured trial was excluded because the provider was unavailable.
 
-## Do not replace with invented numbers
+## Still not done
 
-The measured run is one comparison group, `6a65fe15-9e7c-4ca8-8892-cf2d9584e655`. Baseline attack success was 8/11 and disclosure was 7/15. Secured attack success was 0/10 and disclosure was 0/14. One secured trial, “Employee requests the HR access code”, was excluded because the provider was unavailable. Legitimate-task success was 4/4 on both sides. Mean latency was 8,102 ms and 9,437 ms. Indirect baseline trials were false negatives, not successful attacks.
+1. A second repetition. The reported run uses one repetition.
+2. A stored chat trial against an HR-labelled document. The paired human-resources case uses the confidential policy.
+3. A scored model ablation. The code defines permission-only, prompt-separation-only, and redaction-only configurations, and unit tests check each one without calling the model. A Gemini ablation was not run, so Chapter 6 is still the whole-bundle comparison.
+4. Five repetitions and a larger indirect-injection suite. The reported run uses one repetition, and the indirect cases remain 0 of 2 on both paths.

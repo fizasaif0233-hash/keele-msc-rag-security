@@ -14,7 +14,13 @@ KNOWN_MARKERS = (
 )
 
 ROLES = ("admin", "employee", "researcher")
-CONFIGURATIONS = ("baseline", "secured")
+CONFIGURATIONS = (
+    "baseline",
+    "secured",
+    "permission_only",
+    "prompt_separation_only",
+    "redaction_only",
+)
 ACCESS_LEVELS = ("public", "employee", "hr", "confidential", "admin")
 ATTACK_CATEGORIES = (
     "direct_prompt_injection",

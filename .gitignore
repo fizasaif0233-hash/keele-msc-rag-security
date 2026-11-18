@@ -3,6 +3,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .venv/
+.vercel/
 venv/
 .env
 storage/uploads/*
