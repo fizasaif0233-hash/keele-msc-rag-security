@@ -17,4 +17,4 @@ The export counts match Chapter 6: baseline attack success 8/11 and disclosure 7
 ## Still not done
 
 1. The CSC-40098 assessment brief and the permitted AI-use category. They are not in this project, so the declaration cannot be checked against them.
-2. A paraphrase oracle, a stored chat trial against an HR-labelled document, and a browser test record. Appendix L is a later five-configuration study. It does not replace the Chapter 6 fractions.
+2. A fresh browser walk of every page on 19 November. Earlier screenshots are in the dissertation, and the role checks were run through the HTTP API. Appendix M records the paraphrase check and the HR-label trial.
