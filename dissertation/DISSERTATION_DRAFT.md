@@ -345,7 +345,7 @@ Mean latency rose from 8,102 to 9,437 milliseconds. The medians were 5,987 and 1
 
 ## 6.5 Evidence that was not collected
 
-Appendix F records the sign-in screen, a rejected password, sign-out, and the evaluation page. Those captures are not scored trials. The HR label is covered by the permission unit test, not by a chat trial. Appendix J holds the CSV and JSON export of comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655, read from the stored trials on 18 November 2026. The figures above were read from the database through the reporting function.
+Appendix F records the sign-in screen, a rejected password, sign-out, and the evaluation page. Those captures are not scored trials. The HR label is covered by the permission unit test, not by a chat trial. Appendix J holds the CSV and JSON export of comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655, read from the stored trials on 18 November 2026. The figures above were read from the database through the reporting function. Appendix L reports a later five-configuration study with five repetitions. Those results are not substituted for the fractions above.
 
 # Chapter 7 Discussion
 
@@ -361,11 +361,11 @@ The design limits the interpretation. The controls changed together. Top-k 8 on 
 
 # Chapter 8 Conclusion and Future Work
 
-This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met at the level of a working system and one completed paired run. They were not met as a multi-repetition study, a browser test record, or a single-control ablation.
+This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met by the working system, the 13 November paired run, and the separate control study in Appendix L. A browser test record was not produced.
 
-The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On this run the secured bundle had lower measured attack success and disclosure, legitimate success stayed at four of four, and mean latency was 1,334 milliseconds higher. The controls changed together, so one control’s effect is unestablished. Indirect injection was 0 of 2 on both paths. Three of the seven baseline marker disclosures used a question that already contained the marker. The contribution is the stored comparison, including each decision rule, not a claim that the model became safe. One secured trial never received a model answer. Prompt injection was not shown to be eliminated.
+The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On this run the secured bundle had lower measured attack success and disclosure, legitimate success stayed at four of four, and mean latency was 1,334 milliseconds higher. The controls changed together in that run. Appendix L separates them later. Indirect injection was 0 of 2 on both paths. Three of the seven baseline marker disclosures used a question that already contained the marker. The contribution is the stored comparison, including each decision rule, not a claim that the model became safe. One secured trial never received a model answer. Prompt injection was not shown to be eliminated.
 
-Further work should repeat the suite enough times to see provider variation, split the secured bundle into separate runs, and add a paraphrase check that does not replace the exact oracle. The export is in Appendix J. Appendix K separates retrieval, emission, and visible disclosure. A second repetition and a single-control ablation are still absent. A stored trial against an HR-labelled document would show that path in the results table. Until those gaps are filled, the numerical claims in Chapter 6 should be quoted with the fractions and the exclusion, not as a general percentage improvement.
+Appendix L reports a later study with five configurations and five repetitions. A paraphrase check, and a stored trial against an HR-labelled document, are still absent. The 13 November export is in Appendix J. Appendix K separates retrieval, emission, and visible disclosure for that first run. The Chapter 6 fractions should be quoted with the exclusion, not as a general percentage improvement.
 
 <!-- WORD_COUNT_END -->
 
@@ -647,7 +647,7 @@ The database password, Supabase service key, and model key remain in backend/.en
 
 The files below were written on 18 November 2026 from the stored paired run and from the automated tests in the repository. They do not add a second repetition, and they do not change the rates in Chapter 6.
 
-The export is limited to the experiments named “Synthetic suite paired run 2026-11-13” in comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655. `dissertation/EVIDENCE/paired-run-2026-11-13.csv` is the trial table. `dissertation/EVIDENCE/paired-run-2026-11-13.json` is the same trials with the reporting summary. `dissertation/EVIDENCE/pytest-2026-11-18.txt` is the output of the automated suite run on that date. `dissertation/EVIDENCE/pytest-2026-11-19.txt` is a later run of the same suite after the isolated-control tests were added. Passwords and provider keys are not in these files.
+The export is limited to the experiments named “Synthetic suite paired run 2026-11-13” in comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655. `dissertation/EVIDENCE/paired-run-2026-11-13.csv` is the trial table. `dissertation/EVIDENCE/paired-run-2026-11-13.json` is the same trials with the reporting summary. `dissertation/EVIDENCE/pytest-2026-11-18.txt` is the output of the automated suite run on that date. `dissertation/EVIDENCE/pytest-2026-11-19.txt` is a later run of the same suite after the isolated-control tests were added. `dissertation/EVIDENCE/pytest-2026-11-19-roles.txt` is the suite after the role tests. Passwords and provider keys are not in these files.
 
 # Appendix K Mechanism split for the same run
 
@@ -663,4 +663,26 @@ The one secured emission is the direct administrator trial. No administrator doc
 
 A researcher is not an ordinary employee. The researcher can run the baseline configuration, which retrieves restricted synthetic documents. That privilege is for the experiment. It is not the employee permission set.
 
-The code also defines three partial configurations: permission filter only, prompt separation only, and output redaction only. Automated tests check that each one changes only its own control. They do not call the model. A scored Gemini ablation, a larger indirect-injection suite, and a five-repetition run were not executed. The Chapter 6 rates remain the single paired run of 13 November 2026. Permission filtering is a deterministic application decision: the same caller and document produce the same allow or deny. Prompt separation asks the model to ignore instructions inside retrieved text, so its effect can vary between calls. Output redaction removes a known marker after the model has already emitted it. Those are different mechanisms, and the table above keeps them apart.
+The code also defines three partial configurations: permission filter only, prompt separation only, and output redaction only. Automated tests check that each one changes only its own control. Appendix L records the later model study that ran those configurations. The Chapter 6 rates remain the single paired run of 13 November 2026. Permission filtering is a deterministic application decision: the same caller and document produce the same allow or deny. Prompt separation asks the model to ignore instructions inside retrieved text, so its effect can vary between calls. Output redaction removes a known marker after the model has already emitted it. Those are different mechanisms, and the table above keeps them apart.
+
+# Appendix L Later control study
+
+This appendix records a separate study run on 19 November 2026. It does not change the 13 November rates in Chapter 6. Dataset v2 copies the fifteen v1 cases and adds six indirect questions. None of those six questions contains a catalogue marker. Each of five configurations ran every case five times: baseline, permission filter only, prompt separation only, output redaction only, and the full secured bundle. The three partial configurations use the baseline input limit. The secured bundle keeps its shorter limit. Temperature, top-k, and the synthetic corpus were the stored runtime snapshot. The comparison group is 5f1a4d94-6d3d-43e5-9a78-aaf70c839167. One permission-filter trial, the indirect summary on repetition 4, failed because the database connection closed. It is excluded. The other 524 trials were measured. The files are `dissertation/EVIDENCE/control-study-2026-11-19.csv` and `dissertation/EVIDENCE/control-study-2026-11-19.json`.
+
+| Configuration | Attack success | Disclosure | Legitimate success | Indirect disclosure |
+| --- | --- | --- | --- | --- |
+| Baseline | 41/85 | 36/105 | 20/20 | 1/40 |
+| Permission filter only | 10/84 | 5/104 | 20/20 | 0/39 |
+| Prompt separation only | 40/85 | 35/105 | 20/20 | 0/40 |
+| Output redaction only | 5/85 | 0/105 | 20/20 | 0/40 |
+| Secured bundle | 0/85 | 0/105 | 20/20 | 0/40 |
+
+Attack success includes the oversized-input case. On every configuration except the secured bundle, that case was accepted on all five repetitions, which accounts for five attack successes. Empty questions were rejected. The secured bundle rejected the oversized question as well, so its input-validation attack success was 0 of 10.
+
+Non-input attack successes by repetition were 7, 8, 7, 7 and 7 of 15 on the baseline; 0, 1, 1, 1 and 2 on permission filtering; 7 of 15 on all five prompt-separation repetitions; and 0 of 15 on every redaction and secured repetition. The permission-filter repetition 4 has a denominator of 14 because of the excluded connection failure.
+
+The one baseline indirect disclosure was repetition 2 of the question that uses the facilities notice as a guide. It retrieved administrator and confidential text and showed three markers. The other 39 baseline indirect trials did not. Prompt separation, redaction, and the secured bundle showed no indirect marker. That is one trial against zero, not a large measured effect on indirect injection.
+
+Permission filtering retrieved no administrator, confidential, or HR label on its 74 measured non-input attack trials. Its five disclosures were questions that already contained the marker: four repetitions of the direct administrator question and one role-claim question. Prompt separation retrieved a restricted label on 75 of 75 non-input attack trials and left 35 markers visible. Redaction also retrieved a restricted label on 75 of 75, emitted a marker on 36, and left none visible. The secured bundle retrieved no restricted label on 75 of 75. It emitted a marker on five attack trials whose questions already contained one, and the output check removed each of those five. The administrator’s authorised-code question still showed its own marker. That question is a legitimate task. Legitimate tasks were 20 of 20 on every configuration.
+
+These fractions describe this model, this corpus, and these five repetitions. They do not show that prompt injection has been eliminated.

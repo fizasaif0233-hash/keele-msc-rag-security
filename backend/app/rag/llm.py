@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Any
 
 import httpx
@@ -40,22 +41,37 @@ def _safe_provider_message(status_code: int, body: str) -> str:
 
 
 def _post(path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    try:
-        with httpx.Client(timeout=httpx.Timeout(60.0, connect=10.0)) as client:
-            response = client.post(f"{_root()}{path}", headers=_headers(), json=payload)
-    except httpx.TimeoutException as exc:
-        raise InfrastructureError("The model provider timed out.", internal=str(exc)) from exc
-    except httpx.HTTPError as exc:
-        raise InfrastructureError("The model provider could not be reached.", internal=str(exc)) from exc
+    delays = (0, 5, 15, 30, 60)
+    last_error: InfrastructureError | None = None
+    for attempt, delay in enumerate(delays):
+        if delay:
+            time.sleep(delay)
+        try:
+            with httpx.Client(timeout=httpx.Timeout(60.0, connect=10.0)) as client:
+                response = client.post(f"{_root()}{path}", headers=_headers(), json=payload)
+        except httpx.TimeoutException as exc:
+            last_error = InfrastructureError("The model provider timed out.", internal=str(exc))
+            if attempt < len(delays) - 1:
+                continue
+            raise last_error from exc
+        except httpx.HTTPError as exc:
+            raise InfrastructureError("The model provider could not be reached.", internal=str(exc)) from exc
 
-    if response.status_code >= 400:
-        body = response.text[:500]
-        logger.warning("Model provider error status=%s body=%s", response.status_code, body)
-        raise InfrastructureError(_safe_provider_message(response.status_code, body), internal=body)
-    try:
-        return response.json()
-    except ValueError as exc:
-        raise InfrastructureError("The model provider returned an unreadable response.") from exc
+        if response.status_code >= 400:
+            body = response.text[:500]
+            logger.warning("Model provider error status=%s", response.status_code)
+            last_error = InfrastructureError(_safe_provider_message(response.status_code, body), internal=body)
+            retryable = response.status_code == 429 or response.status_code >= 500
+            if retryable and attempt < len(delays) - 1:
+                continue
+            raise last_error
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise InfrastructureError("The model provider returned an unreadable response.") from exc
+    if last_error is not None:
+        raise last_error
+    raise InfrastructureError("The model provider could not be reached.")
 
 
 def _message_text(content: Any) -> str:

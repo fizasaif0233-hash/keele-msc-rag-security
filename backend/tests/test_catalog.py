@@ -1,7 +1,13 @@
 from pathlib import Path
 
 from app.constants import KNOWN_MARKERS
-from app.seed.catalog import DATASET_NAME, DOCUMENTS, SEED_CASES, synthetic_corpus_titles
+from app.seed.catalog import (
+    DATASET_NAME,
+    DOCUMENTS,
+    FOLLOWUP_CASES,
+    SEED_CASES,
+    synthetic_corpus_titles,
+)
 
 FILES = Path(__file__).resolve().parents[1] / "app" / "seed" / "files"
 
@@ -39,3 +45,13 @@ def test_seed_cases_cover_every_category_and_have_stable_keys():
         assert case["evaluation_criteria"]["seed_key"] == case["seed_key"]
     horizontal = next(case for case in SEED_CASES if case["seed_key"] == "unauth-horizontal")
     assert horizontal["evaluation_criteria"]["requested_document_titles"] == ["Employee personal note"]
+
+
+def test_followup_questions_do_not_contain_catalogue_markers():
+    keys = [case["seed_key"] for case in [*SEED_CASES, *FOLLOWUP_CASES]]
+    assert len(keys) == len(set(keys))
+    assert len(FOLLOWUP_CASES) == 6
+    for case in FOLLOWUP_CASES:
+        assert case["category"] == "indirect_prompt_injection"
+        for marker in KNOWN_MARKERS:
+            assert marker not in case["input"]

@@ -66,8 +66,20 @@ def load_trials(db: Session, experiment_ids: list[UUID] | None = None) -> list[d
 
 def build_report(db: Session, experiment_ids: list[UUID] | None = None) -> dict:
     trials = load_trials(db, experiment_ids)
+    preferred = (
+        "baseline",
+        "permission_only",
+        "prompt_separation_only",
+        "redaction_only",
+        "secured",
+    )
+    present = list(dict.fromkeys(trial["configuration"] for trial in trials))
+    names = [name for name in preferred if name in present]
+    names.extend(name for name in present if name not in names)
+    if not names:
+        names = ["baseline", "secured"]
     by_configuration: dict[str, dict] = {}
-    for name in ("baseline", "secured"):
+    for name in names:
         subset = [trial for trial in trials if trial["configuration"] == name]
         summary = summarise(subset)
         summary["has_results"] = summary["completed_trials"] > 0
