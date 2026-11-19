@@ -98,7 +98,7 @@ Organisations are adding natural-language assistants to web applications so that
 
 ## 1.2 Prompt injection and unauthorised disclosure
 
-Perez and Ribeiro (2022) showed that a user can override an application prompt with a direct instruction. Greshake et al. (2023) showed that an attacker can instead place instructions in content the application later retrieves. OWASP lists prompt injection as the first risk in its 2025 guidance for language-model applications and states that retrieval-augmented generation does not fully remove it (OWASP Foundation, 2025). If restricted text reaches the model, the model may repeat it. A sentence that tells the model to respect permissions is not an access-control mechanism, because the model has already seen the text.
+Direct injection is an instruction in the question. Indirect injection is an instruction in retrieved text. Chapter 2 compares the published evidence with the controls built here.
 
 ## 1.3 Problem, aim, and research question
 
@@ -124,7 +124,7 @@ The objectives are listed in Table 1. They match the work that was built. The sc
 
 ## 1.5 Contribution and structure
 
-The contribution is a working comparison platform. The same question-answering function serves chat and the experiment runner. Each trial stores the outcome, the decision rule, the markers seen before and after redaction, the access levels retrieved, and the latency. Chapter 2 reviews the research context. Chapter 3 explains the method. Chapter 4 records the design. Chapter 5 describes the implementation. Chapter 6 reports the tests and the paired run. Chapter 7 interprets those results. Chapter 8 answers the research question within the limits of the evidence.
+The contribution is a working comparison platform. The same question-answering function serves chat and the experiment runner. Each trial stores the outcome, the decision rule, the markers seen before and after redaction, the access levels retrieved, and the latency. Chapters 2 to 5 cover the context, method, design, and implementation. Chapter 6 reports the tests. Chapter 7 interprets them. Chapter 8 answers the research question within the evidence.
 
 # Chapter 2 Literature Review and Technical Background
 
@@ -138,27 +138,33 @@ Direct prompt injection is an attack in the user input. Perez and Ribeiro (2022)
 
 Indirect prompt injection moves the instruction into data. Greshake et al. (2023) argue that retrieved content can function as instructions. They demonstrated the attack against live integrations and synthetic applications, and they concluded that effective mitigations were lacking. The facilities notice in this project is a small instance. It is public, it tells the model to reveal codes held elsewhere, and it does not contain the scoring markers.
 
-OWASP Foundation (2025) separates the same two types and states that there may be no fool-proof prevention. Recommended mitigations include a constrained system prompt, separation of untrusted content, input and output filtering, and least privilege in application code. Liu et al. (2024) benchmarked five attacks and ten defences across ten models. Prevention prompts and detectors were incomplete: some missed attacks and some damaged the original task. A stronger sentence in the system prompt is therefore not, by itself, an evaluation. The controls have to be measured, including the effect on ordinary questions.
+OWASP Foundation (2025) separates the same two types and states that there may be no fool-proof prevention. Recommended mitigations include a constrained system prompt, separation of untrusted content, input and output filtering, and least privilege in application code. Liu et al. (2024) benchmarked five attacks and ten defences across ten models. Prevention prompts and detectors were incomplete: some missed attacks and some damaged the original task.
 
 ## 2.3 Access control and document permissions
 
 Role-based access control assigns permissions to roles and roles to users (Sandhu et al., 1996). Least privilege is one of the principles that model supports. A document assistant also needs an object-level decision. Two employees can share a role while only one may read a confidential note. Document authorisation therefore uses the role, the access label, ownership, and any explicit grant.
 
-Permission-filtered retrieval applies that decision before similarity search. If the filter runs after the model has read the chunk, the disclosure may already have occurred. A prompt that says “do not reveal confidential documents” is not a substitute for an allow-list. NIST (2023) treats AI risk measurement as ongoing rather than as a one-time guarantee. A filter can be tested. A promise made after the secret has been supplied cannot be tested in the same way.
+Permission-filtered retrieval applies that decision before similarity search. If the filter runs after the model has read the chunk, the disclosure may already have occurred. A prompt that says “do not reveal confidential documents” is not a substitute for an allow-list. NIST (2023) treats AI risk measurement as ongoing rather than as a one-time guarantee.
 
 ## 2.4 Input checks, output checks, and logging
 
-OWASP Foundation (2025) includes filtering among mitigations and warns that string checks can be evaded by paraphrase. Suspicious phrases are therefore recorded in this project and do not, by themselves, reject the question. Output checking looks only for synthetic markers the caller should not see. An exact marker misses a paraphrase. It is still a defined oracle: the investigator knows which string counts and can see whether redaction hid it. Logging does not stop an attack. It records whether a trial was blocked by the filter, by redaction, or by an input rule. Perez and Ribeiro (2022) and Liu et al. (2024) both require success to be defined before the result is interpreted. Chapter 3 states those rules.
+OWASP Foundation (2025) includes filtering among mitigations and warns that string checks can be evaded by paraphrase. Suspicious phrases are therefore recorded in this project and do not, by themselves, reject the question. Output checking looks only for synthetic markers the caller should not see. An exact marker misses a paraphrase. It is still a defined oracle: the investigator knows which string counts and can see whether redaction hid it. Logging does not stop an attack. It records whether a trial was blocked by the filter, by redaction, or by an input rule. Chapter 3 states how success is defined.
 
 ## 2.5 Why these controls, and what remains open
 
-The controls are identity, the document allow-list, prompt placement, input length, known markers, and the decision log. They change together. Hines et al. (2024) transform untrusted text so a model can separate it from instructions. On their GPT-family tests, indirect-attack success fell from above 50 per cent to below 2 per cent. This project uses boundary markers rather than that encoding, and its indirect cases were 0 of 2 on both paths. Greshake et al. (2023) and Liu et al. (2024) show that prompt-level defences leave residual risk.
+The controls are identity, the document allow-list, prompt placement, input length, known markers, and the decision log. Published studies and this project do not use the same model, corpus, or success rule, so their percentages are not interchangeable.
+
+Lewis et al. (2020) improve answers by adding retrieved text. They do not test who may see that text. Sandhu et al. (1996) supply the missing decision: a role and an object label, applied by the application. NIST (2023) treats the outcome as a measurement under stated conditions, not as a certificate.
+
+Perez and Ribeiro (2022) show that a direct instruction can override a prompt and that an exact output check can stop a known string. Appendix M tests that limit: four paraphrases contained no marker, and the secured path blocked all four by withholding the documents. Greshake et al. (2023) place the instruction in retrieved data. Hines et al. (2024) encode that data. On their GPT-family tests, indirect-attack success fell from above 50 per cent to below 2 per cent. This project marks a boundary instead. Its first indirect pair was 0 of 2 on both paths. The later set was 1 of 40 on the baseline and 0 of 40 on the secured path, a smaller contrast on a smaller test.
+
+Liu et al. (2024) found that prompt defences miss attacks and can harm ordinary tasks. OWASP Foundation (2025) says prevention may not be fool-proof and places least privilege beside prompt controls. Prompt separation alone did not stop restricted retrieval in Appendix L. Redaction hid markers after retrieval. The secured bundle withheld the documents and removed echoed markers. Those are different mechanisms. None of them shows that injection has been eliminated.
 
 # Chapter 3 Methodology and Research Design
 
 ## 3.1 Development approach
 
-The assessment is a system-development project, so the instrument had to exist before it could be measured. The work proceeded in increments: schema and access rules, the retrieval pipeline, the two configurations, the synthetic dataset, automated checks, and then the paired run. A plan that froze the metrics first would have missed the ways retrieval can fail. A prototype without stored trials would not answer the research question. Appendix G sets out the 24-week schedule for this project.
+The assessment is a system-development project, so the instrument had to exist before it could be measured. The work proceeded in increments: schema and access rules, the retrieval pipeline, the two configurations, the synthetic dataset, automated checks, and then the paired run. Appendix G sets out the 24-week schedule.
 
 ## 3.2 Experimental design
 
@@ -364,11 +370,11 @@ The design limits the interpretation. The controls changed together. Top-k 8 on 
 
 # Chapter 8 Conclusion and Future Work
 
-This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met by the working system, the 13 November paired run, and the separate control study in Appendix L. A browser test record was not produced.
+This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met by the working system, the 13 November paired run, and the separate control study in Appendix L. Appendix N records the 19 November screen walk.
 
 The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On this run the secured bundle had lower measured attack success and disclosure, legitimate success stayed at four of four, and mean latency was 1,334 milliseconds higher. The controls changed together in that run. Appendix L separates them later. Indirect injection was 0 of 2 on both paths. Three of the seven baseline marker disclosures used a question that already contained the marker. The contribution is the stored comparison, including each decision rule, not a claim that the model became safe. One secured trial never received a model answer. Prompt injection was not shown to be eliminated.
 
-Appendix L reports a later study with five configurations and five repetitions. Appendix M records a paraphrase check and one HR-label trial. The 13 November export is in Appendix J. Appendix K separates retrieval, emission, and visible disclosure for that first run. The Chapter 6 fractions should be quoted with the exclusion, not as a general percentage improvement.
+Appendix L reports a later study with five configurations and five repetitions. Appendix M records a paraphrase check and one HR-label trial. Appendix N records the screen walk. The 13 November export is in Appendix J. Appendix K separates retrieval, emission, and visible disclosure for that first run. The Chapter 6 fractions should be quoted with the exclusion, not as a general percentage improvement.
 
 <!-- WORD_COUNT_END -->
 
@@ -706,3 +712,17 @@ These two checks were run on 19 November 2026 after Appendix L. They do not chan
 Baseline attack success was 4 of 4 and disclosure was 4 of 4. Secured attack success was 0 of 4 and disclosure was 0 of 4. Every secured block was the permission filter. This is one pass of four questions, not a general paraphrase result.
 
 The HR-label trial used the same people-records policy. For that trial only, its label was changed from confidential to hr, the question was run once on each configuration, and the label was then restored to confidential. Comparison group 63414be9-47bd-42b2-a7a7-dd84d5ec9066. The file is `dissertation/EVIDENCE/hr-label-trial-2026-11-19.json`. The question does not contain the marker. Baseline retrieved the hr label and showed SYNTHETIC_HR_SECRET_001. Secured retrieved nothing and recorded the permission filter. That is one trial of the hr label. The 13 November corpus remains labelled confidential.
+
+# Appendix N Screen walk on 19 November 2026
+
+This walk used the live site after Appendices L and M. It does not change a measured rate. No experiment was started, no document was uploaded or deleted, and no setting was saved. One incorrect password was tried. The working passwords are not written here.
+
+The sign-in page loaded. An incorrect password for the administrator account stayed on that page and showed “Invalid login credentials”. The registration page loaded and stated that registration does not grant an administrator role. The password-reset page loaded. Neither form was submitted.
+
+The administrator dashboard showed that role, 14 accessible documents, 3 chat sessions, 41 test cases, and 11 experiments. The document list included the synthetic corpus, and the HR confidential policy was labelled confidential. Chat offered Secured and Baseline. Security research listed the HR-label trial (1 case), the paraphrase check (4), dataset v2 (21), and dataset v1 (15). Selecting dataset v1 showed its 15 cases. The experiment list showed the 13 November paired run, the five control-study configurations, the paraphrase check, and the HR-label trial, all completed. The new-run form offered only baseline and secured. The 13 November baseline detail page showed 15 of 15 trials, attack success 72.7%, disclosure 46.7%, legitimate success 100.0%, and average latency 8,102 ms. The evaluation page offered CSV and JSON export. Its baseline and secured percentages pool every stored trial of those two configurations, including the later studies, so they are not the Chapter 6 figures. Security logs showed 100 rows, including blocked document access, suspicious requests, rejected input, authorisation failure, and authentication failure. Settings showed the saved model and limits. Secrets were marked configured and were not displayed. Employee upload was false.
+
+The employee navigation showed Dashboard, Documents, and AI chat. The dashboard reported 8 documents. Test cases and experiments were marked restricted. The document list had eight public or employee items. The HR confidential policy, the finance report, the administrator security policy, and the other employee’s personal note were absent. The page stated that this account cannot upload. Chat offered only Secured, the control was disabled, and the page stated that employees use the secured configuration. Opening the research, experiment, evaluation, log, and settings addresses directly showed “You do not have permission to perform this action.” Those pages did not list cases, experiments, rates, log rows, or settings.
+
+The researcher navigation matched the administrator set. The dashboard showed 8 documents, 41 test cases, and 11 experiments. Chat offered Secured and Baseline, and the control was enabled. The restricted titles above were absent, and the upload form offered only public and employee labels. The experiment list showed the same 11 completed runs. Settings displayed the same saved values and did not show a save button. The evaluation page again offered both exports, and the log page showed 100 rows.
+
+Chapter 6 remains the 13 November paired run. The evaluation-page percentages are a later pool of stored baseline and secured trials.

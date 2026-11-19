@@ -14,7 +14,10 @@ These files are the source of Appendix J and are stored with the project. `backe
 
 The export counts match Chapter 6: baseline attack success 8/11 and disclosure 7/15; secured attack success 0/10 and disclosure 0/14. One secured trial was excluded because the provider was unavailable.
 
+## Recorded on 19 November 2026
+
+The screen walk is in Appendix N of the dissertation. Section 2.5 compares the verified sources with the measured controls.
+
 ## Still not done
 
-1. The CSC-40098 assessment brief and the permitted AI-use category. They are not in this project, so the declaration cannot be checked against them.
-2. A fresh browser walk of every page on 19 November. Earlier screenshots are in the dissertation, and the role checks were run through the HTTP API. Appendix M records the paraphrase check and the HR-label trial.
+1. The CSC-40098 assessment brief and the permitted AI-use category. They are not in this project, so the declaration cannot be checked against them. The declaration discloses AI use and does not claim a category.
