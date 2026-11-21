@@ -244,6 +244,10 @@ def add_table(document, rows):
                 shade_cell(cell)
                 for run in paragraph.runs:
                     run.font.color.rgb = RGBColor(255, 255, 255)
+    header = table.rows[0]._tr.get_or_add_trPr()
+    tbl_header = OxmlElement("w:tblHeader")
+    tbl_header.set(qn("w:val"), "true")
+    header.append(tbl_header)
     if email_column is not None and len(rows[0]) == 3:
         set_widths(table, (3.2, 8.2, 4.5))
     document.add_paragraph()
@@ -325,6 +329,8 @@ def configure(document):
         style.paragraph_format.space_before = Pt(before)
         style.paragraph_format.space_after = Pt(after)
         style.paragraph_format.line_spacing = 1.15
+        style.paragraph_format.keep_with_next = name == "Heading 2"
+        style.paragraph_format.page_break_before = False
     normal = styles["Normal"]
     normal.font.name = "Times New Roman"
     normal.font.size = Pt(12)
@@ -360,16 +366,16 @@ def build():
                 add_text(p, title, size=20, bold=True)
                 i += 1
                 continue
-            document.add_page_break()
-            document.add_heading(title, level=1)
+            heading_paragraph = document.add_heading(title, level=1)
+            heading_paragraph.paragraph_format.page_break_before = True
             i += 1
             continue
         if line.startswith("## "):
             heading = line[3:].strip()
             major = heading in {"Abstract", "Declaration", "Acknowledgements", "References"}
+            heading_paragraph = document.add_heading(heading, level=1 if major else 2)
             if major:
-                document.add_page_break()
-            document.add_heading(heading, level=1 if major else 2)
+                heading_paragraph.paragraph_format.page_break_before = True
             if heading == "Table of contents":
                 add_contents(document, contents_entries(lines))
                 while i + 1 < len(lines) and not lines[i + 1].startswith("#"):
