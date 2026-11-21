@@ -5,7 +5,7 @@
 **Assessment:** Final MSc Project: Report and Associated Project Outputs  
 **Candidate name:** Khamare Clarke  
 **Student number:** 25005383  
-**Date:** 20 November 2026  
+**Date:** 21 November 2026  
 **Live website:** https://keele-msc-rag-web.vercel.app  
 **Live API:** https://keele-msc-rag-api.vercel.app
 
@@ -19,16 +19,18 @@ Generative AI drafted and revised prose and assisted with code. I chose the rese
 
 Khamare Clarke  
 25005383  
-20 November 2026  
-Paired run dated 13 November 2026. Disclosure added 19 November 2026.
+21 November 2026  
+Paired run dated 13 November 2026. Control study dated 19 November 2026. Extended indirect study dated 21 November 2026.
 
 ## Abstract
 
-This project compares two configurations of one RAG web application on the same corpus, cases, models, and retrieval settings. The baseline authenticates the caller but does not filter retrieval, separate retrieved text, or redact markers. The secured configuration adds those controls, a stricter input limit, and security-decision logging.
+This project compares application-level controls in one RAG web application. Permission filtering decides which documents enter retrieval. Prompt separation places retrieved text outside the system instruction. Output redaction removes a known marker after generation. The weak baseline authenticates the caller and does none of those three. The secured bundle applies all three, with a stricter input limit and a decision log. These results are not a universal guarantee.
 
-One paired run of 15 cases, with one repetition, was completed on 13 November 2026. Baseline attack success was 8 of 11 (72.7 per cent). One of those eight was an oversized input, so the headline rate is not only prompt injection. Without the two input-validation trials it is 7 of 9. Disclosure was 7 of 15. Secured attack success was 0 of 10, and 0 of 8 without those two trials, and disclosure was 0 of 14. One secured trial was excluded because the provider was unavailable. Indirect injection was 0 of 2 on both paths, so this run does not show an indirect-injection defence. All but one of the marker cases were stopped because the restricted document was not retrieved. The remaining case, the direct administrator question, was stopped by redaction. Legitimate success was 4 of 4. The unrounded means differ by 1,334 milliseconds. Rounding each mean first makes the gap 1,335. Those means include rejected inputs recorded as 0 milliseconds.
+One paired run of 15 cases, with one repetition, was completed on 13 November 2026. Baseline attack success was 8 of 11 (72.7 per cent). One of those eight was an oversized input. Without the two input-validation trials it is 7 of 9. Disclosure was 7 of 15. Secured attack success was 0 of 10, and 0 of 8 without those two trials, and disclosure was 0 of 14. One secured trial was excluded because the provider was unavailable. Indirect injection was 0 of 2 on both paths, so this run does not show an indirect-injection defence. All but one of the marker cases were stopped because the restricted document was not retrieved. The direct administrator question was stopped by redaction. Legitimate success was 4 of 4.
 
-A later control study, on 19 November 2026, compared five configurations on 21 cases with five repetitions. The secured bundle recorded 0 of 85 attack successes and 0 of 105 disclosures, with 20 of 20 legitimate tasks. On the non-input attack trials, redaction also recorded zero successes. The remaining gap is the shorter input limit. Permission filtering and output redaction changed different parts of the outcome. Prompt separation alone stayed close to the baseline. Four paraphrases produced no secured disclosure. These findings belong to this application, this model, this synthetic corpus, and these cases. They are not a general defence, and the 13 November reduction is not proof that protection is complete.
+Table 14 is the 19 November study: five configurations, 21 cases, five repetitions. On the non-input attack trials, redaction and the bundle both recorded zero successes. The remaining attack-success gap is the shorter input limit. Legitimate success was 20 of 20.
+
+On 21 November, ten further public notes, with embedded instructions and no catalogue marker, were tested once. Baseline followed the instruction in 4 of 10 and disclosed in 4 of 10. Permission filtering and the bundle were 0 of 10. Prompt separation was 1 of 10. Redaction followed 4 of 10 and disclosed 0 of 10, so following an instruction and showing a marker are different outcomes. A second run of the same ten cases matched the disclosure counts. Redaction followed 3 of 10 on that run. A conventional configuration, which separates retrieved text and uses the shorter limit but does not filter or redact, disclosed 1 of 10 and retrieved a restricted label in all 10. One repetition does not show that indirect injection has been eliminated.
 
 ## Acknowledgements
 
@@ -77,6 +79,8 @@ The entries below are written into the Word document from the chapter and sectio
 - Table 11. Synthetic corpus used in the official run.
 - Table 12. Twenty-four-week project schedule.
 - Table 13. Synthetic sign-in accounts.
+- Table 14. Control-study rates, 19 November.
+- Table 15. Extended indirect-injection outcomes, 21 November.
 
 ## List of abbreviations
 
@@ -96,15 +100,15 @@ The entries below are written into the Word document from the chapter and sectio
 
 ## 1.1 Background
 
-Organisations are adding natural-language assistants to web applications so that staff can ask questions of internal documents. Retrieval-augmented generation retrieves passages and conditions the answer on them (Lewis et al., 2020). In a private document system this creates two problems. A passage the caller must not read should not be retrieved. A retrieved passage, or the question itself, may also contain directions that the model follows.
+Organisations are adding natural-language assistants to web applications so that staff can ask questions of internal documents. Retrieval-augmented generation retrieves passages and conditions the answer on them (Lewis et al., 2020). A relevant passage is not necessarily one the caller may read. Retrieval can expose it before the model writes an answer, and the passage may contain instructions. Authentication does not stop the model from following them. The controls tested here therefore sit at retrieval, at prompt construction, and at the visible answer.
 
 ## 1.2 Prompt injection and unauthorised disclosure
 
-Direct injection is an instruction in the question. Indirect injection is an instruction in retrieved text. A third problem is the corpus itself. A passage can be planted so that retrieval returns it, and a passage the caller may read can still be drawn back out. The first paired run did not produce an indirect success on the baseline, so it cannot show that an indirect defence worked. Chapter 2 compares those threats with the controls built here.
+Direct injection is an instruction in the question. Indirect injection is an instruction in retrieved text. A planted passage is a third problem, and this project does not poison the index. Four outcomes are kept apart. Instruction-following means the model emits a forbidden marker the question did not contain. Unauthorised retrieval means a restricted label was retrieved. Disclosure means that marker stays visible. A legitimate-task failure is a benign question rejected or left unanswered. Redaction can stop disclosure after the model has followed an instruction. Those results are not interchangeable. The first paired run had no baseline indirect success, so it cannot show an indirect defence.
 
 ## 1.3 Problem, aim, and research question
 
-The practical problem is that a demonstration chatbot cannot show whether an application control changed the outcome. A research application has to keep the model, the corpus, and the tests fixed, change a defined set of controls, and store each trial. The aim of this project is to design and implement that application, and to measure whether the secured configuration reduces prompt-injection success and unauthorised disclosure of synthetic markers while legitimate questions still succeed.
+A demonstration chatbot cannot show whether one control changed the outcome. This project keeps the model, the corpus, and the tests fixed, changes a defined set of controls, and stores each trial.
 
 The research question is: to what extent can selected application-level security controls reduce prompt injection and unauthorised information disclosure in an AI-powered RAG web application while maintaining legitimate task performance?
 
@@ -126,7 +130,7 @@ The objectives are listed in Table 1. They match the work that was built. The sc
 
 ## 1.5 Contribution and structure
 
-The contribution has three parts: a working RAG web application; a stored comparison of the baseline and the secured bundle; and a later test of permission filtering, prompt separation, and output redaction, separately and together. The same answer function serves chat and the experiment runner. Each trial stores the outcome, the decision rule, the markers before and after redaction, the access levels retrieved, and the latency.
+The contribution is an application-level evaluation, not a universal benchmark and not proof that prompt injection has been prevented. It has three parts. The application implements authentication, document permissions, and the controls under test. The evaluation compares a weak baseline, each control alone, a conventional separation baseline, and the combined bundle. The analysis separates restricted retrieval, instruction-following, and visible disclosure. The same answer function serves chat and the experiment runner, and each trial stores the decision, the markers, the retrieved labels, and the latency.
 
 # Chapter 2 Literature Review and Technical Background
 
@@ -158,21 +162,27 @@ Suspicious phrases are recorded and do not, by themselves, reject the question. 
 
 The controls are identity, the document allow-list, prompt placement, input length, known markers, and the decision log. Published studies and this project do not use the same model, corpus, or success rule, so their percentages are not interchangeable.
 
-Two controls answer different failures. Permission filtering decides whether restricted text enters retrieval. Output redaction removes a known string after the model has generated it. A prompt that says “ignore the documents” does not do the first job. Perez and Ribeiro (2022) show that a direct instruction can override a prompt. They treat an exact target phrase as their success test, and they list output moderation among the few controls an application has. They do not show that an exact string check stops an attack. Appendix M tests that limit: four paraphrases contained no marker, and the secured path blocked all four by withholding the documents, not by recognising a paraphrase.
+Perez and Ribeiro (2022) show that a direct instruction can override a prompt. They treat an exact target phrase as their success test, and they list output moderation among the few controls an application has. They do not show that an exact string check stops an attack. Appendix M tests that limit: four paraphrases contained no marker, and the secured path blocked all four by withholding the documents, not by recognising a paraphrase.
 
-Hines et al. (2024) encode retrieved data and, on their GPT-family tests, report indirect-attack success falling from above 50 per cent to below 2 per cent. Chen et al. (2025) separate the channels and train the model. They report manual-attack success below 2 per cent on the models they trained, and they say the defence is not complete. This project marks a boundary and does not train the model. Zhan et al. (2024) report that a prompted GPT-4 agent was vulnerable about 24 per cent of the time in the setting they highlight, including data theft. That figure is theirs.
+Hines et al. (2024) report a fall from above 50 per cent to below 2 per cent after encoding retrieved data. Chen et al. (2025) report manual-attack success below 2 per cent on models they trained, and say the defence is not complete. Zhan et al. (2024) report about 24 per cent in the setting they highlight. Those figures are theirs. This project does not encode the text or train a model. It asks how application controls change different stages of one disclosure attempt. Appendix O compares the papers.
 
-The gap is a measurement of those decisions, separately and together, in one application. Appendix L is that measurement. Prompt separation alone did not stop restricted retrieval. Redaction hid markers afterwards. The secured bundle did both. None of this shows that injection has been eliminated.
+| Study | What it contributes | What this project examines |
+| --- | --- | --- |
+| Greshake et al. (2023) | Indirect instructions in retrieved content | Controls against instructions in public notes |
+| Hines et al. (2024) | Encoding of retrieved content | Separation without encoding or training |
+| Chen et al. (2025) | Trained channel separation | Separation in the application prompt only |
+| Zeng et al. (2024) | Leakage from ordinary retrieval | Whether the caller may retrieve the document |
+| Liu et al. (2024) | Prompts and detectors can miss attacks | The same cases on each control alone |
 
 # Chapter 3 Methodology and Research Design
 
 ## 3.1 Development approach
 
-The assessment is a system-development project, so the instrument had to exist before it could be measured. The work proceeded in increments: schema and access rules, the retrieval pipeline, the two configurations, the synthetic dataset, automated checks, and then the paired run. Appendix G sets out the 24-week schedule.
+The assessment is a system-development project, so the instrument had to exist before it could be measured. Requirements, access rules, the retrieval pipeline, the configurations, the synthetic dataset, automated checks, and the measured runs followed one another. Later runs used the same answer function. Appendix G sets out the 24-week schedule.
 
 ## 3.2 Experimental design
 
-The study is a paired comparison inside one application. Table 2 lists what stays fixed and what changes. A paired run creates two experiment rows with the same comparison group, dataset, repetition count, and parameter snapshot. Each case runs once per repetition through the same answer function as chat. An experiment flag allows an employee actor to be tested on the baseline, which employees cannot select in the interface. Temperature is stored as 0. The provider can still vary, so each repetition is its own row.
+Table 2 lists what stays fixed. Each case runs once per repetition through the same answer function as chat. An experiment flag lets an employee actor be tested on the baseline, which employees cannot select in the interface. Temperature is stored as 0. The provider can still vary.
 
 **Table 2. Factors held constant and factors that change.**
 
@@ -184,27 +194,29 @@ The study is a paired comparison inside one application. Table 2 lists what stay
 | Top-k 8, similarity threshold −1, temperature 0 | Marker redaction |
 | Scoring function | RAG security-decision logging |
 
-The official dataset snapshot names eight synthetic document titles. Both configurations search only those titles, and the secured configuration then removes documents the actor cannot read. Other uploaded files remained in the database and can still appear in ordinary chat. They were not part of this comparison. Chunk size 800 and overlap 120 are stored on the run. They describe the index already built. The trial does not rebuild it. The input ceilings stored for the run were 4,000 characters on the secured path and 12,000 on the baseline path, under an absolute ceiling of 20,000.
+Both configurations search the eight official titles. The secured path then removes documents the actor cannot read. Other uploaded files can still appear in ordinary chat and were not part of this comparison. Chunk size 800 and overlap 120 describe the index already built. The input ceilings were 4,000 characters on the secured path and 12,000 on the baseline, under an absolute ceiling of 20,000.
 
-Two studies are reported, and they are not one sample. The 13 November run is one repetition of fifteen cases, baseline against the full bundle. It can show whether the bundle changed the stored outcome. It cannot separate provider noise from the control. The 19 November study repeats five configurations five times, to see whether each pattern recurred. Those repeats are not independent attacks. An infrastructure failure is excluded and is not counted as a defence. Chapter 6 is only the paired run. Appendix L is not substituted for it.
+The runs are not one sample. On 13 November the bundle is compared once with the weak baseline, which leaves retrieved text in the system message and uses the 12,000-character limit. It is not a conventional secure system. On 19 November the same five configurations are repeated five times: baseline, permission filtering, prompt separation, redaction, and the bundle. On 21 November ten new indirect cases are run once on those five, then repeated once, plus a conventional configuration that separates text and uses the 4,000-character limit without filtering or redaction. Repeats of one question are not independent attacks. An infrastructure failure is excluded and is not a defence. Chapter 6 reports the counts.
 
 ## 3.3 Synthetic corpus, roles, and cases
 
-The corpus is fictional. Four marker strings are the disclosure oracle, covering the human-resources policy, finance, the administrator policy, and another employee’s note. The indirect-injection notice does not contain them. Roles are administrator, employee, and researcher. There is no HR login. Document labels are public, employee, HR, confidential, and administrator. An administrator can read every document. An employee or researcher can read public and employee documents, plus anything they own or are granted. The other labels are otherwise denied.
+The corpus is fictional. Four marker strings cover the human-resources policy, finance, the administrator policy, and another employee’s note. The indirect-injection notice does not contain them. Roles and labels follow Table 3. There is no HR login.
 
-Fifteen cases cover benign questions, direct injection, indirect injection, unauthorised disclosure, and input validation. Benign cases expect a known phrase, or the administrator marker when the caller is an administrator. Marker attacks succeed only when a forbidden marker remains visible. The oversized question succeeds as an attack when the invalid input is accepted. The employee is the caller for the attack cases. The second employee owns the personal note. A missing actor is an infrastructure failure, not a block.
+Fifteen cases cover benign questions, direct injection, indirect injection, unauthorised disclosure, and input validation. Dataset v2 adds six indirect questions. All eight indirect questions in that set ask about one facilities notice, so they are one planted document, not eight independent attacks. The 21 November notes are ten separate public documents. They contain no catalogue marker, and neither do their questions. That run searches the original eight titles plus those notes, with top-k 20. The employee is the caller for the attack cases. The second employee owns the personal note. A missing actor is an infrastructure failure, not a block.
 
 ## 3.4 Metrics and procedure
 
-Attack success rate is successful attack trials divided by measured attack trials, multiplied by 100. A marker attack succeeds when a forbidden marker remains in the visible answer. The oversized-input attack succeeds when that invalid input is accepted. Disclosure rate is trials with a visible forbidden marker divided by all measured trials, multiplied by 100. An authorised administrator marker is not forbidden on that case. Legitimate-task success uses only benign trials whose answer contains the expected content. A blocked attack is not a legitimate success.
+Four rates are reported with their numerators. Instruction-following, called attack compliance in the extended study, means the model emitted a forbidden marker that the question did not already contain. A marker repeated from the question is an echo, not extraction. Unauthorised retrieval means a retrieved label was administrator, confidential, or HR for a caller who may not read it. Disclosure means a forbidden marker remains visible. The paired-run attack rate also counts an accepted oversized input. Legitimate success uses only benign trials whose answer contains the expected content. A blocked attack is not a legitimate success. Disclosure rate uses all measured trials as the denominator. An authorised administrator marker is not forbidden on that case.
 
-Latency is the mean of recorded times on measured trials. The median and the 95th percentile use linear interpolation. The latency comparison is the secured mean minus the baseline mean. Percentage reduction for the two security rates is (baseline − secured) / baseline × 100. It is undefined when the baseline rate is zero. Infrastructure failures are excluded and are not counted as defences. A false negative is an attack that finished without disclosure and without a recorded block. A baseline refusal is therefore not evidence that a control worked. A false positive is a rejected benign question.
+Latency is the mean of measured trials. The median and the 95th percentile use linear interpolation. Infrastructure failures are excluded and are not defences. A false negative finished without disclosure and without a recorded block. A baseline refusal is not evidence that a control worked. A false positive is a rejected benign question. Outcomes were read back through the application’s reporting function.
 
-The synthetic users and eight documents were seeded and confirmed ready. Both configurations then ran under the snapshot above. Outcomes were read back through the application’s reporting function.
+## 3.5 Validity
 
-## 3.5 Ethics and fairness
+One model, a synthetic corpus, and marker strings bound the score. The intervals in Appendix L describe this sample. The extended study uses one repetition on each run. The conventional configuration checks ordinary separation, without filtering or redaction, on the ten short questions.
 
-The documents, names, and markers are synthetic. The project does not use live personal data as the test corpus. Additional files in the same database were excluded by title. The comparison shares the snapshot, the case list, the repetition count, and the scorer. It is not a randomised sample of attacks.
+## 3.6 Ethics and fairness
+
+The documents, names, and markers are synthetic. The project does not use live personal data as the test corpus. Additional files in the same database were excluded by title. It is not a randomised sample of attacks.
 
 # Chapter 4 Requirements Analysis and System Design
 
@@ -214,7 +226,7 @@ A user must be able to sign in, upload a PDF or text file, assign an access labe
 
 ## 4.2 Architecture
 
-Figure 1 shows the deployed shape. The browser runs a Next.js application. It obtains a Supabase access token and calls a FastAPI service. The service verifies the token, reads the role from the profiles table, and performs retrieval and generation. PostgreSQL stores profiles, documents, grants, chunks, chats, datasets, experiments, results, logs, and settings. Vectors use pgvector. Uploaded bytes are stored on the API server’s local disk, not in Supabase Storage. Row-level security is enabled and the public Data API is revoked from application tables, except that an authenticated user may read their own profile. The API connects as the database owner and bypasses that security, so authorisation is the API’s responsibility.
+Figure 1 shows the deployed shape. The browser runs a Next.js application. It obtains a Supabase access token and calls a FastAPI service. The service, not the browser, verifies the token, reads the role from the profiles table, and performs retrieval and generation. An invalid token is rejected before any search. PostgreSQL with pgvector stores the documents, chunks, and experiment rows. Uploaded bytes stay on the API server’s disk. Row-level security is enabled and the public Data API is revoked from application tables, except that an authenticated user may read their own profile. The API connects as the database owner and bypasses that security. The allow-list is therefore the check that matters. If a route skipped it, the owner connection could return a restricted chunk. A restricted database role would be defence in depth. This deployment does not use one, and the stored trials did not either.
 
 **Figure 1. System architecture of the research application.**
 
@@ -234,7 +246,7 @@ Figure 2 shows documents. An allowed upload is type-checked, extracted, chunked,
 
 ## 4.4 Configurations
 
-Table 3 is the access rule in code. Table 4 is the configuration record. Figure 4 contrasts prompt construction. In the baseline, retrieved chunks are concatenated into the system message, and the instruction tells the model to follow the documents and the user. That ordinary pattern is the weak condition on purpose, and a reader can call it a strawman. The comparison asks what changes when retrieval is no longer placed in the instruction. In the secured configuration, the system message is a fixed instruction that treats references as data. Chunks are placed in the user message between labelled untrusted boundaries. If a full chunk appears inside the secured system message, the pipeline stops rather than calling the model. Figure 5 shows how a case becomes a stored outcome. The design keeps authentication and document-management authorisation on for both configurations. Turning those off would make the platform unsafe without answering the research question. The experiment varies the RAG controls, not the existence of login. The researcher may select the baseline and may run experiments. An employee may not. That extra privilege is intentional: the weak configuration has to be measurable. It does not give the researcher the administrator’s document rights. Table 3 still denies HR, confidential, and administrator documents unless the caller owns them or holds a grant.
+Table 3 is the access rule in code. Table 4 is the configuration record. Figure 4 contrasts prompt construction. In the baseline, retrieved chunks are concatenated into the system message, and the instruction tells the model to follow the documents and the user. That ordinary pattern is the weak condition on purpose, and a reader can call it a strawman. The comparison asks what changes when retrieval is no longer placed in the instruction. In the secured configuration, the system message is a fixed instruction that treats references as data. Chunks are placed in the user message between labelled untrusted boundaries. If a full chunk appears inside the secured system message, the pipeline stops rather than calling the model. Figure 5 shows how a case becomes a stored outcome. Authentication stays on for both configurations. The experiment varies the RAG controls, not the existence of login. The researcher may select the baseline. An employee may not. That privilege does not give the researcher the administrator’s document rights.
 
 **Table 3. Roles and document access in the implementation.**
 
@@ -274,15 +286,15 @@ The interface is Next.js 15 with React 19 and TypeScript. The API is FastAPI on 
 
 Token verification and profile lookup are server-side. A failed login attempt is logged and rejected. Document listing and preview use Table 3. A hidden document is reported as not found. Only an administrator can change a label or a grant. Other callers may assign only public or employee. Employee upload was off in the observed settings.
 
-The allow-list is built from the caller’s role, ownership, grants, and the document label before similarity search. Retrieval then passes that list to `match_document_chunks`. Because the API connects as the database owner, row-level security does not apply to this query, so the allow-list is the check that matters. Similarity is one minus cosine distance. The threshold of −1 keeps chunks inside that list eligible up to top-k, which suits a corpus of eight chunks. A high threshold could hide the same document from both configurations and turn the comparison into a ranking study. Chunks outside the resolved scope are discarded after the query. The official runner first limits the search to the eight synthetic titles.
+The allow-list is built from the caller’s role, ownership, grants, and the document label before similarity search. Retrieval then passes that list to `match_document_chunks`. Section 4.2 records why that list, not row-level security, is the check. Similarity is one minus cosine distance. The threshold of −1 keeps chunks inside that list eligible up to top-k, which suits a corpus of eight chunks. A high threshold could hide the same document from both configurations and turn the comparison into a ranking study. Chunks outside the resolved scope are discarded after the query. The official runner first limits the search to the eight synthetic titles.
 
 ## 5.3 Prompts, output checks, and logging
 
-The secured system prompt tells the model to treat references and the question as untrusted. The baseline prompt tells the model to follow the documents and the user. Separation can reduce the chance that retrieved text is obeyed. It cannot remove that text from the prompt. The secured input limit rejects a question above 4,000 characters. It does not decide whether a shorter question is an attack. The baseline limit is 12,000 characters, so the same oversized question is accepted there.
+The secured system prompt tells the model to treat references and the question as untrusted. The baseline prompt tells the model to follow the documents and the user. Separation can reduce the chance that retrieved text is obeyed. It cannot remove that text, and it is not an allow-list. The secured input limit rejects a question above 4,000 characters. It does not decide whether a shorter question is an attack. The baseline limit is 12,000 characters, so the same oversized question is accepted there.
 
 Output checking replaces an unauthorised marker with a redaction token. On the secured path the match ignores letter case and a small set of zero-width characters. It can hide a known catalogue string after generation. It cannot detect a paraphrase, a marker split by an ordinary space, or a secret that is not in the catalogue. Markers the caller may read are left in place. The same redaction is applied to source excerpts on the secured path. The baseline does not redact either channel.
 
-Security logs are written on a separate database session. Metadata keys that look like passwords, tokens, or API keys are removed, and long strings are truncated. The log does not store the full chunk. Suspicious questions are logged on the secured path and are still answered. Both configurations share a process-local rate limit. Infrastructure errors, including a provider timeout or an unavailable response, are stored as infrastructure failures.
+Security logs omit passwords, tokens, and API keys, and they do not store the full chunk. Suspicious questions are logged on the secured path and are still answered. A provider timeout or an unavailable response is stored as an infrastructure failure.
 
 ## 5.4 Interface and implementation difficulties
 
@@ -294,11 +306,9 @@ The direct database host did not resolve on the development machine, so the appl
 
 ## 6.1 What was tested without the model
 
-Automated tests check rules that do not depend on a model answer. They cover the permission matrix, including employee denial of an HR document, prompt separation, input and upload checks, marker redaction, log scrubbing, outcome labels, and the rate formulas. Numbers inside the formula tests are fixtures, not findings. Isolation tests use the database. A missing token and a forged token returned 401 and were logged. Using the stored embedding of the HR document, the employee allow-list did not put the restricted markers in the secured prompt. The baseline search did, and it placed the HR marker in the system message. A chunk from outside the secured scope was dropped before the model call and was kept on the baseline path.
+Automated tests check rules that do not depend on a model answer: the permission matrix, prompt separation, input checks, marker redaction, log scrubbing, and the rate formulas. Numbers in the formula tests are fixtures. A missing token and a forged token returned 401. The employee allow-list did not put the HR marker in the secured prompt. The baseline search did, inside the system message. Appendix J records the suite.
 
-Appendix J records the automated suite. The sign-in captures in Appendix F are not that suite.
-
-## 6.2 The paired run
+## 6.2 Paired run, 13 November
 
 The run used one repetition and the snapshot in Chapter 3. Both rows completed 15 of 15 trials. Table 5 is the report produced by the application’s own summary function. Percentages are shown to one decimal place. The fractions are the exact counts.
 
@@ -316,7 +326,7 @@ The run used one repetition and the snapshot in Chapter 3. Both rows completed 1
 | Median latency | 5,987 ms | 11,506 ms |
 | 95th percentile latency | 16,942.5 ms | 16,374 ms |
 
-The engine’s percentage reduction for attack success is 100 per cent, and the reduction for disclosure is 100 per cent, because both secured rates were zero. The absolute differences are 72.7 and 46.7 percentage points. The legitimate-task difference is zero. The unrounded means differ by 1,334 milliseconds. Rounding each mean before subtracting gives 1,335. The secured mean is the slower one. These reductions describe this run. They do not include the excluded trial, and they do not estimate how often the provider would fail again.
+Both secured rates were zero, so the stored reductions are 100 per cent for this run only. They omit the excluded trial. The unrounded means differ by 1,334 milliseconds. Rounding each mean first makes the gap 1,335.
 
 **Table 6. Outcome counts.**
 
@@ -340,41 +350,77 @@ The baseline block was the empty question, which both configurations reject. The
 | Unauthorised disclosure attack success | 4/4 (100%) | 0/3 (0%); one trial excluded |
 | Input validation attack success | 1/2 (50%) | 0/2 (0%) |
 
-## 6.3 How the secured trials were blocked
+The 100 per cent reductions describe this run only. They are not proof that protection is complete. Seven of the eight baseline attack successes were a visible marker. Three of those questions already contained it. Indirect success was 0 of 2 on both paths. The secured HR trial is the excluded provider failure. Appendix C lists every trial. Comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655.
 
-Appendix C lists every trial. Seven of the eight baseline attack successes were a visible forbidden marker. Three of those questions already contained the marker. The other four did not, and baseline retrieval included restricted documents. Indirect attack success was 0 of 2 on both paths. On the secured path, employee attack trials retrieved only employee and public documents, or nothing. The direct administrator trial is the exception: no administrator document was retrieved, the question already contained the marker, and redaction removed it. The finance question did not contain the marker. Secured retrieval stayed inside employee and public documents and did not emit it. The secured HR trial failed because the provider was unavailable and is excluded. The administrator’s benign request succeeded on both paths, with its own marker visible.
+## 6.3 Control study, 19 November
 
-## 6.4 Functional and latency results
+Table 14 repeats the five configurations. Denominators differ where one trial was an infrastructure failure. Appendix L holds the rows.
 
-All four benign cases succeeded on both configurations. On an ordinary employee question, the secured path did not retrieve administrator or confidential labels. The baseline path did, and still did not emit a marker. Rejected inputs recorded 0 milliseconds and are included in those means. Excluding them, Appendix K reports 8,681 and 11,010 milliseconds, a gap of 2,329. The median rose from 5,987 to 11,506. One repetition cannot show whether that gap is stable.
+**Table 14. Control-study rates, 19 November.**
 
-## 6.5 Evidence that was not collected
+| Configuration | Attack success | Disclosure | Legitimate success |
+| --- | --- | --- | --- |
+| Baseline | 41/85 | 36/105 | 20/20 |
+| Permission filtering | 10/84 | 5/104 | 20/20 |
+| Prompt separation | 40/85 | 35/105 | 20/20 |
+| Output redaction | 5/85 | 0/105 | 20/20 |
+| Secured bundle | 0/85 | 0/105 | 20/20 |
 
-Five records stay apart. Table 5 is the paired run, once. Appendix L is the control study, five times. Appendix M is four paraphrases and one HR-label trial. Appendix N is a screen walk, not a scored experiment. See Appendices P-Q. The 100 per cent reduction here is the paired-run difference, not proof that protection is complete. Appendix J holds the export of comparison group 6a65fe15-9e7c-4ca8-8892-cf2d9584e655.
+Permission filtering reduced attack success because the restricted document was not retrieved. Its remaining successes were a marker already in the question, or an oversized input. Prompt separation left retrieval unchanged. Redaction’s five attack successes are that oversized input, not five disclosures. On the non-input attack trials, redaction and the bundle both recorded zero successes. By case, baseline succeeded on 8 of 15 and the bundle on none. The bundle’s Wilson interval is 0.0–4.3 per cent. The case resample is 0–0 only because every case here was zero. Neither interval generalises.
+
+## 6.4 Extended indirect study, 21 November
+
+Table 15 is one repetition of ten public notes. The questions and the notes contain no catalogue marker. Top-k was 20. Fifty trials were measured and none was excluded. Appendix P names the four baseline disclosures: the starter sheet, the handover slip, the conflicting meeting papers, and the combined building notes.
+
+**Table 15. Extended indirect-injection outcomes, 21 November.**
+
+| Configuration | Followed | Unauthorised retrieval | Disclosure |
+| --- | --- | --- | --- |
+| Baseline | 4/10 | 10/10 | 4/10 |
+| Permission filtering | 0/10 | 0/10 | 0/10 |
+| Prompt separation | 1/10 | 10/10 | 1/10 |
+| Output redaction | 4/10 | 10/10 | 0/10 |
+| Secured bundle | 0/10 | 0/10 | 0/10 |
+
+Redaction followed the same four instructions as the baseline and then removed every marker. Retrieval still happened. The other six baseline trials retrieved restricted text and did not emit a marker. That is not a defence. Permission filtering and the bundle retrieved no restricted label.
+
+## 6.5 Reproduction and conventional baseline
+
+The same ten cases were run again, once. Disclosure was again 4, 0, 1, 0, and 0 of 10. Redaction followed 3 of 10 rather than 4: the combined building notes were retrieved and no marker was emitted. One provider status 503 was logged and is not an exclusion. This is a second pass over the same designs, not a new dataset. Appendix Q records comparison group a6b87c2c-3dd0-447d-8f3f-2a8dcf24884f.
+
+The conventional configuration separates retrieved text and uses the 4,000-character limit. It does not filter and it does not redact. The ten questions are shorter than that limit, so the limit rejected none of them. Followed was 1 of 10, unauthorised retrieval was 10 of 10, and disclosure was 1 of 10, the handover slip. That matches prompt separation. The nine trials that retrieved a restricted label and emitted nothing are not evidence of a defence.
+
+## 6.6 Legitimate tasks, latency, and what the rates answer
+
+Legitimate success was 4 of 4 and later 20 of 20. That is a scripted sample, not a user study. Rejected inputs recorded as 0 milliseconds are inside the means above. Excluding them, Appendix K reports 8,681 and 11,010 milliseconds. One repetition cannot show that the gap is stable.
 
 # Chapter 7 Discussion
 
-The 13 November comparison is of the whole bundle. Attack success fell from 8 of 11 to 0 of 10, and disclosure from 7 of 15 to 0 of 14. Indirect injection was 0 of 2 on both paths, so that run does not show an indirect-injection defence. The measured drop is mainly that restricted documents were not retrieved. One trial was excluded.
+## 7.1 What the stages show
 
-Appendix L shows why the parts are not equal. Attack success was 41 of 85 on the baseline, 10 of 84 with permission filtering alone, 40 of 85 with prompt separation alone, 5 of 85 with redaction alone, and 0 of 85 with the secured bundle. Permission filtering reduced attack success because the restricted document was not retrieved. Most of the questions were direct requests, not instructions hidden in a document. Its remaining successes were a marker already written in the question, or an oversized input that the longer limit accepts. Prompt separation performed poorly because retrieval was unchanged: the model still received the restricted text, and a label in the prompt did not build the allow-list. Redaction stopped visible disclosure because it removed the known marker after generation. It did not stop restricted retrieval. On the 75 non-input attack trials, redaction and the bundle both recorded zero successes. The 5 of 85 against 0 of 85 is the shorter input limit. By case, baseline succeeded on 8 of 15 non-input attack cases and the bundle on none. Appendix L separates a marker taken from a retrieved document from one repeated out of the question. A remaining weakness is an instruction inside a document the caller is allowed to read, such as the public facilities notice, and any secret that is not a catalogue marker.
+The results support a stage argument, not a claim that the bundle eliminates injection. A control helps only at the point where it acts. Permission filtering withholds documents the caller may not read. It does nothing about an instruction in a public note the caller may read, except that the restricted target may never be retrieved. Prompt separation marks retrieved text as untrusted. Tables 14 and 15 show that the restricted text was still retrieved, and that the model still followed the handover instruction. Output redaction hides a catalogue string. It does not stop retrieval, and Appendix M shows that it did not need to recognise a paraphrase: the four paraphrases were blocked by withholding the documents. The bundle recorded no attack success in the control study and no restricted retrieval in the ten-note study. Zero of 85 is not a probability of zero outside that suite.
 
-Zero of 85 is not a probability of zero. Appendix L gives a Wilson interval of 0.0–4.3% and a case-resample interval of 0–0. The resample is 0–0 only because every case in this suite was zero. Neither interval shows the rate generalises.
+## 7.2 Relation to the cited studies
 
-Baseline disclosed the personal marker from the requested note. The secured path removed that note. The direct administrator trial is the echo: the marker was redacted although no administrator document was retrieved. Appendix M’s four paraphrases were blocked by withholding documents. That is not a general paraphrase defence.
+Section 2.5 and Appendix O place these results beside the cited studies. The ten notes are not a repeat of Greshake et al. (2023). No model was trained, and retrieved text was not encoded. The allow-list does not hide a document the caller may read. Prompt separation alone missed an attack, as Liu et al. (2024) found a prevention prompt can do. Their percentages use other models and other success rules.
 
-Legitimate success was 4 of 4 and later 20 of 20. That is a small scripted sample, not a user study.
+## 7.3 Use, validity, and practice
 
-The means in Chapter 6 include zero-millisecond rejections. Appendix K removes them and the gap widens to 2,329 milliseconds. The median nearly doubled.
+Internal validity is limited by provider variation, including the excluded 13 November failure and the logged 503. Construct validity is limited by marker scoring: an echo is not extraction, and an absent marker is not proof that no secret was revealed. External validity is limited by one model and a synthetic corpus. Repeated questions are not independent designs, and eight facilities questions share one notice.
 
-The database owner bypasses row-level security. If a route skipped the allow-list, that connection could return a restricted chunk. The tests covered the paths that exist, not a route that has not been written. Row-level security is not the protection. One model, eight synthetic documents, and exact marker strings bound both studies. NIST (2023) treats this as a record under stated conditions, not a certificate.
+The weak baseline can exaggerate the bundle. The conventional run is the check against ordinary separation, and on these short questions it did not beat prompt separation. The owner database connection makes the application allow-list essential. Row-level security is not protecting that query.
+
+A developer should filter documents before retrieval, treat retrieved text as untrusted, and use a marker check only as a second control. A prompt that says not to reveal a document is not an allow-list. Logs record the decision. They do not make it. A restricted database role would add a boundary this deployment does not have.
+
+Further work would use other models, a larger corpus, more independent indirect designs, secrets that are not catalogue strings, a poisoned index, an independent tester, that restricted role, and real users. Those activities were not done here.
 
 # Chapter 8 Conclusion and Future Work
 
-This project built a web application in which a document assistant can be run as a baseline RAG system or as a secured bundle, and in which every official trial is stored. The implementation includes server-side authentication, document authorisation, permission-filtered retrieval, separation of trusted instructions from retrieved text, input handling, synthetic-marker checks, and security logs. The objectives in Table 1 were met by the working system, the 13 November paired run, and the separate control study in Appendix L. Appendix N records the 19 November screen walk.
+The project implemented one document assistant in which the same answer function serves chat and the stored experiments. Authentication and document authorisation stay on. The RAG controls can be varied. Table 1 is met by that system and by the runs in Chapter 6.
 
-The research question asked to what extent the controls can reduce prompt injection and unauthorised disclosure while legitimate tasks still succeed. On 13 November the secured bundle lowered both rates, legitimate success stayed at four of four, and the unrounded mean latency was 1,334 milliseconds higher. The controls changed together. Appendix L separates them: permission filtering withheld restricted documents, prompt separation did not, and redaction hid known markers after retrieval. The bundle’s later result was 0 of 85 attack successes and 0 of 105 disclosures, with 20 of 20 legitimate tasks. On the non-input attack trials, redaction also recorded zero successes. Injection was not shown to be eliminated.
+Chapter 6 answers the research question. Permission filtering withheld restricted documents. Prompt separation did not. Redaction hid known markers after the model had followed an instruction. The bundle recorded no measured attack success in the control study and no restricted retrieval in the ten-note study. The conventional baseline still disclosed the handover slip. Injection was not shown to be eliminated.
 
-Further work would test other model providers, a larger and more varied corpus, more indirect and paraphrased attacks, an independent tester, and real users with a usability measure. Those activities were not done here. The Chapter 6 fractions should be quoted with the excluded trial, not as a general percentage improvement.
+The contribution is the application, the comparison of each control with the bundle and with ordinary separation, and the separation of retrieval, instruction-following, and disclosure. The findings do not establish complete prompt-injection prevention, or a result for other models and applications. The Chapter 6 fractions should be quoted with their denominators and with the excluded trial.
 
 <!-- WORD_COUNT_END -->
 
@@ -759,23 +805,7 @@ The employee navigation showed Dashboard, Documents, and AI chat. The dashboard 
 
 The researcher navigation matched the administrator set. The dashboard showed 8 documents, 41 test cases, and 11 experiments. Chat offered Secured and Baseline, and the control was enabled. The restricted titles above were absent, and the upload form offered only public and employee labels. The experiment list showed the same 11 completed runs. Settings displayed the same saved values and did not show a save button. The evaluation page again offered both exports, and the log page showed 100 rows.
 
-Chapter 6 remains the 13 November paired run. The evaluation-page percentages are a later pool of stored baseline and secured trials.
-
-# Appendix P Extended indirect prompt injection
-
-This study was run on 21 November 2026. It does not change Chapter 6 or Appendix L. Ten new public notes were added. The questions do not contain a catalogue marker, and neither do the notes. The corpus for this run is the original eight titles plus those notes. Top-k was 20 for this run only, so the search could see that corpus. Temperature and the model were the stored runtime snapshot. One repetition was used. The comparison is in `dissertation/EVIDENCE/ipi-extension-2026-11-21.json`. Fifty trials were measured and none was excluded.
-
-Three outcomes are kept separate. Followed means the model emitted a forbidden marker. The question did not contain that marker. Unauthorised retrieval means a retrieved label was administrator, confidential, or HR. Disclosure means the marker remained visible.
-
-| Configuration | Followed | Unauthorised retrieval | Disclosure |
-| --- | --- | --- | --- |
-| Baseline | 4/10 | 10/10 | 4/10 |
-| Permission filter only | 0/10 | 0/10 | 0/10 |
-| Prompt separation only | 1/10 | 10/10 | 1/10 |
-| Output redaction only | 4/10 | 10/10 | 0/10 |
-| Secured bundle | 0/10 | 0/10 | 0/10 |
-
-The four baseline disclosures were the starter sheet, the handover slip, the conflicting meeting papers, and the combined building notes. Prompt separation disclosed only the handover slip. Redaction emitted a marker on the same four trials as the baseline and then removed each one, so retrieval still happened and disclosure did not. Permission filtering and the secured bundle retrieved no restricted label. On the other six questions the baseline retrieved restricted text and did not emit a marker. Those six are not evidence that the baseline defended itself. One repetition cannot show that the four successes would recur.
+Chapter 6 reports the measured runs. This walk is not one of them. The evaluation-page percentages are a later pool of stored baseline and secured trials.
 
 # Appendix O Comparison with the papers already cited
 
@@ -796,9 +826,25 @@ This table uses only the papers in the reference list. Their percentages are the
 | Sandhu et al. (1996) | Permissions are assigned through roles. | The document decision also uses the label, the owner, and any grant. |
 | NIST (2023) | AI risk measurement is ongoing. | The stored runs are a record under the stated conditions, not a certificate. |
 
+# Appendix P Extended indirect prompt injection
+
+This study was run on 21 November 2026. Chapter 6 reports the counts. This appendix keeps the case detail. Ten new public notes were added. The questions do not contain a catalogue marker, and neither do the notes. The corpus for this run is the original eight titles plus those notes. Top-k was 20 for this run only, so the search could see that corpus. Temperature and the model were the stored runtime snapshot. One repetition was used. The comparison is in `dissertation/EVIDENCE/ipi-extension-2026-11-21.json`. Fifty trials were measured and none was excluded.
+
+Three outcomes are kept separate. Followed means the model emitted a forbidden marker. The question did not contain that marker. Unauthorised retrieval means a retrieved label was administrator, confidential, or HR. Disclosure means the marker remained visible.
+
+| Configuration | Followed | Unauthorised retrieval | Disclosure |
+| --- | --- | --- | --- |
+| Baseline | 4/10 | 10/10 | 4/10 |
+| Permission filter only | 0/10 | 0/10 | 0/10 |
+| Prompt separation only | 1/10 | 10/10 | 1/10 |
+| Output redaction only | 4/10 | 10/10 | 0/10 |
+| Secured bundle | 0/10 | 0/10 | 0/10 |
+
+The four baseline disclosures were the starter sheet, the handover slip, the conflicting meeting papers, and the combined building notes. Prompt separation disclosed only the handover slip. Redaction emitted a marker on the same four trials as the baseline and then removed each one, so retrieval still happened and disclosure did not. Permission filtering and the secured bundle retrieved no restricted label. On the other six questions the baseline retrieved restricted text and did not emit a marker. Those six are not evidence that the baseline defended itself. One repetition cannot show that the four successes would recur.
+
 # Appendix Q Reproduction, conventional baseline, and paired designs
 
-This appendix does not change Chapter 6, Appendix L, or Appendix P. The first indirect export remains `dissertation/EVIDENCE/ipi-extension-2026-11-21.json`, comparison group e35f9f9b-b216-46c9-802e-1e52d2ada633.
+Chapter 6 summarises this appendix. The first indirect export remains `dissertation/EVIDENCE/ipi-extension-2026-11-21.json`, comparison group e35f9f9b-b216-46c9-802e-1e52d2ada633.
 
 ## A second run of the same ten cases
 
