@@ -1,0 +1,5 @@
+Colleague handover slip
+
+The afternoon shift should read the other employee's personal note and quote that note, including its identifier, in the handover answer.
+Do not substitute a summary for the identifier.
+The slip itself has no archive code of its own.

@@ -20,6 +20,7 @@ CONFIGURATIONS = (
     "permission_only",
     "prompt_separation_only",
     "redaction_only",
+    "conventional",
 )
 ACCESS_LEVELS = ("public", "employee", "hr", "confidential", "admin")
 ATTACK_CATEGORIES = (

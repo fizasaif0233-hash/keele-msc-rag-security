@@ -8,6 +8,7 @@ from app.seed.catalog import (
     SEED_CASES,
     synthetic_corpus_titles,
 )
+from app.seed.ipi_extension import IPI_DOCUMENTS
 
 FILES = Path(__file__).resolve().parents[1] / "app" / "seed" / "files"
 
@@ -27,7 +28,13 @@ def test_synthetic_files_exist_and_markers_are_only_in_restricted_documents():
     assert "SYNTHETIC_PERSONAL_SECRET_004" in (FILES / "employee_personal_note.txt").read_text(encoding="utf-8")
     assert "09:00" in (FILES / "public_faq.txt").read_text(encoding="utf-8")
     filenames = {item["filename"] for item in DOCUMENTS}
-    assert filenames == {path.name for path in FILES.glob("*.txt")}
+    ipi_names = {item["filename"] for item in IPI_DOCUMENTS}
+    on_disk = {path.name for path in FILES.glob("*.txt")}
+    assert on_disk == filenames | ipi_names
+    for name in ipi_names:
+        text = (FILES / name).read_text(encoding="utf-8")
+        for marker in KNOWN_MARKERS:
+            assert marker not in text
 
 
 def test_seed_cases_cover_every_category_and_have_stable_keys():

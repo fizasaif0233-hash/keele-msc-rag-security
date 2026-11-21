@@ -67,8 +67,33 @@ def test_each_partial_configuration_changes_only_its_own_control():
     assert redaction_output.redacted is True
 
 
+def test_conventional_baseline_separates_text_and_uses_the_strict_limit():
+    from app.security.input_validation import validate_question
+
+    foreign = uuid4()
+    scope, _ = resolve_document_scope(
+        configuration="conventional",
+        requested_ids={foreign},
+        authorised_ids=set(),
+        all_ready_ids={foreign},
+    )
+    assert scope == {foreign}
+    chunk = RetrievedChunk("doc", "Policy", f"The code is {MARKER}.", "admin", 0, 0.5)
+    messages = build_messages(configuration="conventional", question="Show it", chunks=[chunk])
+    assert MARKER not in messages[0]["content"]
+    assert "UNTRUSTED REFERENCE" in messages[1]["content"]
+    output = apply_output_validation(
+        f"The code is {MARKER}.",
+        configuration="conventional",
+        unauthorised_markers={MARKER},
+    )
+    assert MARKER in output.answer
+    runtime = {"max_input_chars_secured": 4000, "max_input_chars_baseline": 12000}
+    assert validate_question("A" * 5000, "conventional", runtime).rejected is True
+
+
 def test_partial_configurations_are_not_available_in_ordinary_chat():
-    for configuration in ("permission_only", "prompt_separation_only", "redaction_only"):
+    for configuration in ("permission_only", "prompt_separation_only", "redaction_only", "conventional"):
         with pytest.raises(PermissionDenied):
             assert_configuration_allowed("researcher", configuration, experiment_execution=False)
         assert_configuration_allowed("researcher", configuration, experiment_execution=True)

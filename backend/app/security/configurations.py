@@ -72,10 +72,24 @@ CONFIGURATION_DEFINITIONS: dict[str, dict[str, Any]] = {
         "security_decision_logging": True,
         "document_management_authorisation": True,
     },
+    "conventional": {
+        "name": "Conventional RAG",
+        "summary": (
+            "Retrieved text is separated from the system instruction and the stricter "
+            "input limit applies. Retrieval is not permission-filtered and markers are not redacted."
+        ),
+        "authentication_required": True,
+        "permission_filtered_retrieval": False,
+        "trusted_untrusted_separation": True,
+        "input_validation": "strict",
+        "output_validation": False,
+        "security_decision_logging": True,
+        "document_management_authorisation": True,
+    },
 }
 
 
-PARTIAL_CONFIGURATIONS = ("permission_only", "prompt_separation_only", "redaction_only")
+PARTIAL_CONFIGURATIONS = ("permission_only", "prompt_separation_only", "redaction_only", "conventional")
 
 
 def permission_filtered(configuration: str) -> bool:

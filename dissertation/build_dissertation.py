@@ -208,10 +208,29 @@ def shade_cell(cell):
     tc_pr.append(shd)
 
 
+def prevent_wrap(cell):
+    tc_pr = cell._tc.get_or_add_tcPr()
+    tc_pr.append(OxmlElement("w:noWrap"))
+
+
+def set_widths(table, widths):
+    table.autofit = False
+    table.allow_autofit = False
+    layout = OxmlElement("w:tblLayout")
+    layout.set(qn("w:type"), "fixed")
+    table._tbl.tblPr.append(layout)
+    grid = table._tbl.find(qn("w:tblGrid"))
+    for index, width in enumerate(widths):
+        grid[index].set(qn("w:w"), str(int(width * 567)))
+        for row in table.rows:
+            row.cells[index].width = Cm(width)
+
+
 def add_table(document, rows):
     table = document.add_table(rows=len(rows), cols=len(rows[0]))
     table.style = "Table Grid"
     table.autofit = True
+    email_column = next((index for index, value in enumerate(rows[0]) if value.strip().lower() == "email"), None)
     for r_index, row in enumerate(rows):
         for c_index, value in enumerate(row):
             cell = table.rows[r_index].cells[c_index]
@@ -219,10 +238,14 @@ def add_table(document, rows):
             paragraph = cell.paragraphs[0]
             paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
             add_text(paragraph, value.replace("**", ""), size=10, bold=r_index == 0)
+            if email_column is not None and c_index == email_column:
+                prevent_wrap(cell)
             if r_index == 0:
                 shade_cell(cell)
                 for run in paragraph.runs:
                     run.font.color.rgb = RGBColor(255, 255, 255)
+    if email_column is not None and len(rows[0]) == 3:
+        set_widths(table, (3.2, 8.2, 4.5))
     document.add_paragraph()
 
 

@@ -2,6 +2,7 @@ import re
 from dataclasses import dataclass
 
 from app.constants import ABSOLUTE_MAX_INPUT_CHARS, ABSOLUTE_MAX_UPLOAD_BYTES
+from app.security.configurations import CONFIGURATION_DEFINITIONS
 from app.exceptions import InputRejected
 
 SUSPICIOUS_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
@@ -35,7 +36,8 @@ class InputValidationResult:
 
 
 def _limit_for(configuration: str, runtime: dict) -> int:
-    if configuration == "secured":
+    flags = CONFIGURATION_DEFINITIONS.get(configuration) or {}
+    if flags.get("input_validation") == "strict":
         configured = int(runtime.get("max_input_chars_secured", 4000))
     else:
         configured = int(runtime.get("max_input_chars_baseline", 12000))

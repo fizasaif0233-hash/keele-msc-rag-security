@@ -7,6 +7,7 @@ identity data. They never read a role supplied by the browser.
 from uuid import UUID
 
 from app.constants import ACCESS_LEVELS, CONFIGURATIONS
+from app.security.configurations import PARTIAL_CONFIGURATIONS
 
 
 def can_read_document(
@@ -83,7 +84,7 @@ def assert_configuration_allowed(role: str, configuration: str, *, experiment_ex
 
     if configuration not in CONFIGURATIONS:
         raise InputRejected("Unknown configuration.")
-    if configuration in {"permission_only", "prompt_separation_only", "redaction_only"} and not experiment_execution:
+    if configuration in PARTIAL_CONFIGURATIONS and not experiment_execution:
         raise PermissionDenied(
             "Partial security configurations can be used only by the experiment runner."
         )
