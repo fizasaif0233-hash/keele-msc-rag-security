@@ -248,6 +248,13 @@ def add_table(document, rows):
     tbl_header = OxmlElement("w:tblHeader")
     tbl_header.set(qn("w:val"), "true")
     header.append(tbl_header)
+    if rows[0][0].strip() == "Abbreviation":
+        last = len(table.rows) - 1
+        for r_index, row in enumerate(table.rows):
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    paragraph.paragraph_format.keep_together = True
+                    paragraph.paragraph_format.keep_with_next = r_index < last
     if email_column is not None and len(rows[0]) == 3:
         set_widths(table, (3.2, 8.2, 4.5))
     document.add_paragraph()
@@ -374,7 +381,7 @@ def build():
             heading = line[3:].strip()
             major = heading in {"Abstract", "Declaration", "Acknowledgements", "References"}
             heading_paragraph = document.add_heading(heading, level=1 if major else 2)
-            if major:
+            if major or heading == "List of abbreviations":
                 heading_paragraph.paragraph_format.page_break_before = True
             if heading == "Table of contents":
                 add_contents(document, contents_entries(lines))
@@ -436,6 +443,8 @@ def build():
         p = document.add_paragraph()
         add_text(p, line, size=12)
         style_paragraph(p)
+        if line.startswith("The project demonstrates that application-level controls"):
+            p.paragraph_format.keep_together = True
         i += 1
     try:
         document.save(DOCX)
